@@ -73,7 +73,7 @@ Jambook deploys with [Kamal](https://kamal-deploy.org) to one server, with SQLit
    ```sh
    KAMAL_REGISTRY_PASSWORD=<registry token> bin/kamal setup -d <name>
    ```
-   Kamal reads `RAILS_MASTER_KEY` from `config/master.key` (see `.kamal/secrets`).
+   Kamal reads `RAILS_MASTER_KEY` from `config/master.key` (see `.kamal/secrets-common`).
 3. Create your host login and set the guest password:
    ```sh
    bin/kamal app exec -d <name> -i "bin/rails jambook:host EMAIL=you@example.com"

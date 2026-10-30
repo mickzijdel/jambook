@@ -1,0 +1,204 @@
+# Actions are pinned to a commit SHA with the release tag in a trailing comment (supply-chain
+# safety — see the github-actions skill's security-checklist.md). Bump with `pinact run -u` and
+# verify with scripts/check_action_refs.sh (see SKILL.md › "Keeping GitHub Actions current").
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Default GITHUB_TOKEN to read-only; a job needing more declares its own permissions: block.
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+      - name: Make bin files executable
+        run: chmod +x bin/*
+      - name: Lint code for consistent style
+        # rubocop loads the rubocop-rails/-performance/-minitest(or -rspec) plugins via .rubocop.yml.
+        run: bin/rubocop -f github
+      - name: Analyze ERB templates for parse errors (herb)
+        run: bundle exec herb analyze app/
+      - name: Lint ERB templates (herb)
+        # `herb lint` delegates to npx @herb-tools/linter (version pinned to the herb gem); the
+        # runner ships Node. --github emits Actions annotations; --fail-level error (default) gates.
+        run: bundle exec herb lint app/ --github
+      - name: Executable bits on shipped scripts
+        # Any tracked file whose first line is a shebang must be mode 100755 in the
+        # index (binstubs especially) — with core.fileMode=false a local chmod never
+        # reaches git, and a 100644 script dies with exit 126 on every fresh clone.
+        # Checks the INDEX, so the `chmod +x bin/*` step above doesn't mask it.
+        # Mirrors the hk `exec-bit-scripts` step so CI and pre-commit agree.
+        run: |
+          bad=$(git ls-files -s | awk -F'\t' '$1 ~ /^100644/ { if ((getline line < $2) > 0 && line ~ /^#!/) print $2; close($2) }')
+          if [ -n "$bad" ]; then
+            echo "Shebang scripts missing the executable bit in the git index. Fix: git update-index --chmod=+x <file>"
+            echo "$bad"
+            exit 1
+          fi
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+      - name: Make bin files executable
+        run: chmod +x bin/*
+      - name: Run tests
+        env:
+          RAILS_ENV: test
+        run: bin/rails db:test:prepare test
+      - name: Model/DB consistency (database_consistency)
+        # The test DB is prepared above, so this gates (not advisory). Checks model
+        # validations/associations against the actual schema (missing NOT NULL, indexes, etc.).
+        env:
+          RAILS_ENV: test
+        run: bundle exec database_consistency
+
+  # Live sync, transpose and capo are browser behaviour, so they're covered by system tests.
+  system-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+      - name: Make bin files executable
+        run: chmod +x bin/*
+      - name: Run system tests
+        env:
+          RAILS_ENV: test
+        run: bin/rails db:test:prepare test:system
+      - name: Keep screenshots from failed system tests
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: screenshots
+          path: ${{ github.workspace }}/tmp/screenshots
+          if-no-files-found: ignore
+
+  # Security scanning — mirrors Rails 8's default scan_ruby/scan_js jobs, plus a gem CVE check.
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+      - name: Make bin files executable
+        run: chmod +x bin/*
+      - name: Rails security scan (brakeman)
+        run: bundle exec brakeman -q --no-pager --exit-on-warn
+      - name: Dependency CVE scan (bundler-audit)
+        # Best-effort DB refresh (network); `check` always gates against the bundled-or-updated DB.
+        run: |
+          bundle exec bundle-audit update >/dev/null 2>&1 || true
+          bundle exec bundle-audit check
+      - name: JS dependency scan (importmap audit)
+        # Only meaningful for importmap-rails apps; skip cleanly on jsbundling/esbuild apps.
+        run: '[ -f bin/importmap ] && bin/importmap audit || echo "no bin/importmap — skipping"'
+
+  # Toolchain + service versions are pinned in several files at once (mise.toml, the
+  # .<lang>-version files, the Dockerfile ARGs, and the compose/deploy `image:` tags) because
+  # different consumers read different ones, and nothing makes them agree — a bump that misses
+  # one file is silent. Mirrors the hk `versions` step so the gates can't drift. Reads files
+  # only, so it needs no toolchain: the cheapest job in this workflow.
+  versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Toolchain and service versions agree across files
+        run: bash scripts/check_version_sync.sh
+
+  # Run the MIT-licensed gitleaks CLI (via mise, version-pinned in mise.lock) rather than
+  # gitleaks/gitleaks-action: the action requires a paid GITLEAKS_LICENSE on org-owned repos,
+  # while the CLI is free for all repos and is exactly what the local hk pre-commit hook runs.
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # gitleaks git scans the full commit history
+          persist-credentials: false
+      - uses: jdx/mise-action@82a612c5ab8bcda7cc5db6b7e81a8e7584c3dc6e # v5.2.3
+      - name: Scan git history for secrets
+        run: mise exec -- gitleaks git --redact --no-banner .
+
+  # GitHub Actions workflow checks — mirrors the hk `actionlint` + `zizmor` steps. One job runs
+  # both over the workflow files: actionlint (schema/expression/`needs:` correctness; its
+  # shellcheck-of-run: pass is off, see the hk step) then zizmor (security — credential
+  # persistence, template injection, over-broad GITHUB_TOKEN, …; offline audits only, no token).
+  actions-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@82a612c5ab8bcda7cc5db6b7e81a8e7584c3dc6e # v5.2.3
+      - name: Lint workflows (actionlint)
+        run: actionlint -shellcheck=
+      - name: Scan workflows with zizmor
+        run: zizmor --no-progress .github/workflows/
+
+  # Noisier audits — mirror the hk `check` hook (not run on pre-commit).
+  # Add `flay` and `debride` to the Gemfile dev group.
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ruby/setup-ruby@7f797815d8adceb1c412e7abefdd1ab4abc47a5f # v1.335.0
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+      - name: Dead code (debride)
+        run: bundle exec debride --exclude vendor,node_modules,tmp,log .
+      - name: Duplication (flay — Ruby structural, advisory)
+        # flay has no dir --exclude, so scope to source dirs — otherwise it (like debride) scans
+        # the bundler-cache vendor/bundle gems. Non-Rails Ruby repos: adjust the paths. Mirrors hk.
+        run: bundle exec flay app lib || true   # flay exits 0 anyway; surfaces structural clones
+      - name: Performance anti-patterns (fasterer — advisory)
+        run: bundle exec fasterer || true
+      - name: Duplication (jscpd — polyglot gate)
+        # -f scopes to code formats (no config equivalent); .jscpd.json carries
+        # minTokens/threshold/reporters/gitignore/ignore globs (excludes generated
+        # db/schema.rb, structure.sql, app/assets/builds).
+        # Runner + version policy (latest on a 4-day cooldown, floored at v5 — see
+        # SKILL.md › jscpd version policy) are shared with the hk pre-commit gate via
+        # scripts/run-jscpd.sh; --require keeps CI strict (unrunnable jscpd fails the job).
+        run: bash scripts/run-jscpd.sh --require ruby,erb,javascript,typescript,css,scss,sass,vue
+      - name: Large files
+        run: |
+          limit=512000
+          large=$(git ls-files | while read -r f; do
+            s=$(stat -c%s "$f" 2>/dev/null || echo 0)
+            if [ "$s" -gt "$limit" ]; then echo "$f ($s bytes)"; fi
+          done)
+          if [ -n "$large" ]; then echo "Files exceed ${limit} bytes:"; echo "$large"; exit 1; fi

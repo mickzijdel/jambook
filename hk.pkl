@@ -1,0 +1,147 @@
+// dev-env standard (dev-hooks:dev-env-setup) — version tracked via DEV_ENV_VERSION in mise.toml.
+amends "package://github.com/jdx/hk/releases/download/v1.46.0/hk@1.46.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.46.0/hk@1.46.0#/Builtins.pkl"
+
+local linters = new Mapping<String, Step> {
+    ["rubocop"] {
+        glob = "**/*.rb"
+        check = "bin/rubocop"
+        fix = "bin/rubocop -A"
+    }
+    ["test"] {
+        glob = "**/*.rb"
+        check = "bin/rails test"
+    }
+    // --- ERB linting (herb) -----------------------------------------------------
+    // HTML-aware ERB toolchain. `analyze` is pure libherb (parse errors, no network);
+    // `lint` delegates to npx @herb-tools/linter (version pinned to the herb gem, needs `node`
+    // — see mise.toml) and reads `.herb.yml`. Glob-gated to ERB so a Ruby-only commit skips them.
+    // Add `gem "herb", require: false` to the Gemfile dev group.
+    ["herb-analyze"] {
+        glob = "**/*.erb"
+        check = "bundle exec herb analyze app/"
+    }
+    ["herb-lint"] {
+        glob = "**/*.erb"
+        check = "bundle exec herb lint app/"
+        fix = "bundle exec herb lint app/ --fix"
+    }
+    // Shipped scripts (bin/*, script/*) must carry the executable bit IN THE GIT INDEX
+    // (mode 100755): with core.fileMode=false a local chmod +x never reaches git, so
+    // clones get binstubs that die with exit 126 "Permission denied". Detects scripts
+    // by shebang (line 1 only) among 100644-mode index entries. Single awk on purpose:
+    // hk's internal `sh` chokes on a while/read loop inside $() (kills the script at
+    // the assignment even when the substitution exits 0), so keep every intermediate
+    // command zero-exit. CI's lint job enforces the same rule (see ci.<stack>.yml),
+    // so the gates can't drift.
+    ["exec-bit-scripts"] {
+        check = "bad=$(git ls-files -s | awk -F'\\t' '$1 ~ /^100644/ { if ((getline line < $2) > 0 && line ~ /^#!/) print $2; close($2) }'); if [ -n \"$bad\" ]; then echo 'Shebang scripts missing the executable bit in the git index. Fix: git update-index --chmod=+x <file>'; echo \"$bad\"; exit 1; fi"
+    }
+    // Toolchain + service versions are pinned in several files at once, because different
+    // consumers read different ones: mise.toml for local dev, .ruby-version/.node-version for
+    // CI's setup-* actions, the Dockerfile ARGs for the production image, and the `image:` tags
+    // in a compose/deploy manifest for what production runs versus what CI tests against.
+    // Nothing makes them agree, so a bump that misses one file is silent — the image builds on a
+    // different Ruby than the tests ran on, or the suite goes green against a database server
+    // nobody deploys. The script checks only the files that exist and prints what it skipped;
+    // CI's `versions` job runs the same script, so the two gates can't drift. Extend the glob if
+    // this repo pins a version somewhere else. A mise config outside the root goes in place of
+    // mise.toml, with the lock beside it: "mise/config.toml", "mise/mise.lock".
+    ["versions"] {
+        glob = List("mise.toml", "mise.lock", ".ruby-version", ".node-version", "Dockerfile", "docker-compose.yml", "compose.yaml", "config/deploy.yml", ".devcontainer/compose.yaml", ".github/workflows/*.yml")
+        check = "bash scripts/check_version_sync.sh"
+    }
+    // --- Audits (dead-code + duplication) ---------------------------------------
+    // These run on pre-commit too (not just `check`/CI). Duplication uses two complementary
+    // tools: flay (Ruby AST/structural, advisory — exits 0, surfaces renamed clones) and jscpd
+    // (token-based, polyglot — the enforcing gate that also covers JS/CSS/SCSS/ERB). debride
+    // (dead methods) + flay are local `bundle exec` (fast, no network); jscpd runs via npx
+    // (needs `node`, see mise.toml) and reads `.jscpd.json`. Add `flay` and `debride` to the
+    // Gemfile dev group. Each carries a glob, so a docs-only commit skips them.
+    ["debride"] {
+        glob = "**/*.rb"
+        check = "bundle exec debride --exclude vendor,node_modules,tmp,log ."
+    }
+    ["flay"] {
+        glob = "**/*.rb"
+        // flay has no dir --exclude, so scope to source dirs — otherwise it (like debride) scans
+        // the bundler-cache vendor/bundle gems. Non-Rails Ruby repos: adjust the paths. Mirrors CI.
+        check = "bundle exec flay app lib"
+    }
+    // `-f` scopes to code formats (no config equivalent) so docs/configs aren't flagged;
+    // `.jscpd.json` `ignore` globs exclude vendored/generated paths (vendor/, db/schema.rb etc.).
+    // The key must be `ignore` — jscpd v5 silently ignores `ignorePattern` for paths, which let
+    // CI scan CI-installed vendor/bundle gems. (See SKILL.md › jscpd note.)
+    // The version-cooldown policy (latest on a 4-day cooldown, floored at v5) and the
+    // offline fallback live in scripts/run-jscpd.sh, shared with the CI audit job so the
+    // local and CI gates can't drift.
+    ["jscpd"] {
+        glob = List("**/*.rb", "**/*.erb", "**/*.js", "**/*.css", "**/*.scss")
+        check = "bash scripts/run-jscpd.sh ruby,erb,javascript,typescript,css,scss,sass,vue"
+    }
+    // --- Security + correctness -------------------------------------------------
+    // brakeman = Rails SAST (offline, gates). bundler-audit = gem CVE scan: best-effort
+    // `update` refreshes the advisory DB when online (swallowed offline), then `check` gates
+    // against the bundled-or-updated DB. importmap-audit scans pinned JS (importmap apps only,
+    // guarded). fasterer = perf advisory (exits non-zero on offenses → `|| true`).
+    // database_consistency compares model validations/associations to the DB schema; it needs a
+    // reachable dev/test DB, so a cheap `bin/rails runner` connection probe gates when one is up
+    // and skips (exit 0) otherwise — a fresh/un-migrated worktree won't block commits. Keep every
+    // command loop-free: hk's internal `sh` aborts on `while read` inside `$(...)`.
+    // Gems (dev group, require:false): brakeman, bundler-audit, fasterer, database_consistency.
+    ["brakeman"] {
+        glob = "**/*.rb"
+        check = "bundle exec brakeman -q --no-pager --exit-on-warn"
+    }
+    ["bundler-audit"] {
+        glob = "**/Gemfile.lock"
+        check = "bundle exec bundle-audit update >/dev/null 2>&1 || true; bundle exec bundle-audit check"
+    }
+    ["importmap-audit"] {
+        glob = "**/importmap.rb"
+        check = "if [ -f bin/importmap ]; then bin/importmap audit; else echo 'no bin/importmap — skipping'; fi"
+    }
+    ["fasterer"] {
+        glob = "**/*.rb"
+        check = "bundle exec fasterer || true"
+    }
+    ["database_consistency"] {
+        glob = List("db/schema.rb", "db/structure.sql", "app/models/**/*.rb")
+        check = "if bin/rails runner \"ActiveRecord::Base.connection\" >/dev/null 2>&1; then bundle exec database_consistency; else echo 'database_consistency: no DB reachable, skipping'; fi"
+    }
+    // GitHub Actions workflow linter — schema/expression/`needs:` correctness that SHA-pinning
+    // and zizmor don't cover (typo'd keys, bad ${{ }} refs, undefined job deps). hk builtin,
+    // glob-gated to .github/workflows/*.yml|yaml; needs `actionlint` from mise (mise.toml).
+    // `-shellcheck=` turns OFF actionlint's shellcheck-of-`run:` pass: our run: blocks
+    // deliberately word-split (`shellcheck $files`) which trips SC2086, and real *.sh files are
+    // already covered by the dedicated shellcheck step.
+    ["actionlint"] = (Builtins.actionlint) {
+        check = "actionlint -shellcheck= {{ files }}"
+    }
+    // GitHub Actions security static analysis. hk builtin — globs .github/workflows/*.yml,
+    // .github/dependabot.yml and **/action.yml, so it only fires when a workflow/action file
+    // is staged. Flags credential persistence, template injection, over-broad GITHUB_TOKEN
+    // permissions, etc. (see the github-actions skill). Needs `zizmor` from mise (mise.toml).
+    ["zizmor"] = Builtins.zizmor
+    // Secret scanning (defense-in-depth alongside fnox). hk builtin.
+    ["gitleaks"] = Builtins.gitleaks
+    // Block accidentally-committed large files. hk builtin.
+    ["check-added-large-files"] = Builtins.check_added_large_files
+}
+
+hooks {
+    ["pre-commit"] {
+        fix = true
+        stash = "git"
+        steps = linters
+    }
+    ["fix"] {
+        fix = true
+        steps = linters
+    }
+    // `check` is the full suite CI runs. The audits (debride, flay, jscpd) now live in
+    // `linters`, so they already run on pre-commit; `check` is just the same set under one name.
+    ["check"] {
+        steps = linters
+    }
+}

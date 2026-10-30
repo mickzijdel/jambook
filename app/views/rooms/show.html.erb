@@ -1,18 +1,11 @@
+<% content_for :body_class, "song-page" %>
 <div data-controller="wake-lock" data-action="visibilitychange@document->wake-lock#acquire"></div>
 
 <% if @song %>
-  <header class="song-head">
-    <div>
-      <h1><%= @song.title %></h1>
-      <p class="artist"><%= @song.artist %></p>
-    </div>
-    <% if @room.room_key %>
-      <p class="keybox" id="room-key"><span class="key-label">Room key</span> <span class="key"><%= @room.room_key %></span></p>
-    <% end %>
-  </header>
-  <%= render "rooms/host_controls", room: @room if authenticated? %>
-  <%= render "songs/notes", song: @song %>
-  <%= render "songs/sheet", song: @song, key: @room.room_key %>
+  <% actions = capture do %>
+    <%= link_to "Pick next song", songs_path, class: "button ghost" if authenticated? %>
+  <% end %>
+  <%= render "songs/sheet", song: @song, key: @room.room_key, key_label: "Room key", room_controls: authenticated?, actions: actions %>
 <% else %>
   <section class="empty-room">
     <%= image_tag "chalk-guitar.webp", alt: "", class: "chalk-sketch", width: 556, height: 720 %>

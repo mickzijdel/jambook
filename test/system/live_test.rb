@@ -7,35 +7,35 @@ class LiveTest < ApplicationSystemTestCase
     enter_guest_password
 
     assert_selector "#room-key .key", text: "A"
-    assert_text "Your capo 2 · you play G shapes"
+    assert_capo 2, shapes: "G"
     within("#sheet-output") { assert_text "Amazing" }
   end
 
   test "a guest's capo changes only their view and is remembered" do
     enter_guest_password
-    2.times { click_on "capo −" }
+    2.times { click_on "Capo down one fret" }
 
-    assert_text "Your capo 0 · you play A shapes"
+    assert_capo 0, shapes: "A"
     visit root_path
 
-    assert_text "Your capo 0"
+    assert_capo 0
   end
 
   test "a host key change reaches a guest and keeps their capo" do
     using_session(:guest) do
       enter_guest_password
 
-      assert_text "Your capo 2"
+      assert_capo 2
     end
     using_session(:host) do
       sign_in_as_host
       visit root_path
-      click_on "key +"
+      click_on "Key up a semitone"
     end
 
     using_session(:guest) do
       assert_selector "#room-key .key", text: "Bb"
-      assert_text "Your capo 2 · you play Ab shapes"
+      assert_capo 2, shapes: "Ab"
     end
   end
 
@@ -50,10 +50,10 @@ class LiveTest < ApplicationSystemTestCase
   test "capo works when storage is blocked" do
     enter_guest_password
 
-    assert_text "Your capo 2"
+    assert_capo 2
     execute_script("Object.defineProperty(window, 'localStorage', { get() { throw new Error('blocked') } })")
-    click_on "capo −"
+    click_on "Capo down one fret"
 
-    assert_text "Your capo 1"
+    assert_capo 1
   end
 end

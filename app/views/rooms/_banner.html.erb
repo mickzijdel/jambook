@@ -1,5 +1,7 @@
 <%# locals: (page_song: nil) %>
 <% playing = Room.instance.current_song %>
 <% if guest_access? && playing && playing != page_song %>
-  <p class="banner"><%= link_to "Now playing: #{playing.title}. Tap to join.", root_path %></p>
+  <p class="banner">
+    <%= link_to root_path do %><span>Now playing: <strong><%= playing.title %></strong></span> <span class="join">Join</span><% end %>
+  </p>
 <% end %>

@@ -27,7 +27,7 @@ class SongEditorTest < ApplicationSystemTestCase
     using_session(:guest) do
       enter_guest_password
 
-      assert_text "Your capo 2"
+      assert_capo 2
     end
     using_session(:host) do
       sign_in_as_host

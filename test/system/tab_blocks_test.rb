@@ -21,7 +21,7 @@ class TabBlocksTest < ApplicationSystemTestCase
   test "tabs stay as written and say so when the chords move" do
     Room.instance.play(songs(:greensleeves))
     enter_guest_password
-    click_on "capo +"
+    click_on "Capo up one fret"
 
     assert_text "Tab as written: Am"
     assert_includes find("#sheet-output .tab-block", match: :first).text, "A|0----------|3"

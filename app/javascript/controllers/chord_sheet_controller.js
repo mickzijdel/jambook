@@ -3,7 +3,7 @@ import { renderSheet } from "helpers/chord_sheet_helpers"
 
 // Renders a chord sheet in the given key, shifted down by this viewer's own capo for this song.
 export default class extends Controller {
-  static targets = [ "output", "status" ]
+  static targets = [ "output", "status", "capo" ]
   static values = {
     sheet: String,
     format: { type: String, default: "chordpro" },
@@ -50,7 +50,8 @@ export default class extends Controller {
     })
     this.outputTarget.innerHTML = html
     this.fitTabs()
-    this.statusTarget.textContent = transposed ? `Your capo ${capo} · you play ${shownKey} shapes` : "Key unknown, chords as written"
+    if (this.hasCapoTarget) this.capoTarget.textContent = capo
+    this.statusTarget.textContent = transposed ? `you play ${shownKey} shapes` : "Key unknown, chords as written"
   }
 
   // Tab staffs never wrap: shrink each block until its longest line fits the screen.

@@ -1,6 +1,18 @@
 Rails.application.routes.draw do
   root "rooms#show"
 
+  resource :room, only: :show do
+    scope module: :rooms do
+      resource :key, only: :update
+    end
+  end
+
+  resources :songs, only: [] do
+    scope module: :songs do
+      resource :play, only: :create
+    end
+  end
+
   resource :session
   resource :guest_access, only: %i[ new create ]
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

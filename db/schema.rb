@@ -10,7 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_30_151736) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_30_151931) do
+  create_table "rooms", force: :cascade do |t|
+    t.integer "current_song_id"
+    t.string "room_key"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["current_song_id"], name: "index_rooms_on_current_song_id"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "ip_address"
@@ -72,6 +80,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_151736) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "rooms", "songs", column: "current_song_id", on_delete: :nullify
   add_foreign_key "sessions", "users"
   add_foreign_key "taggings", "songs"
   add_foreign_key "taggings", "tags"

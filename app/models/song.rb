@@ -1,5 +1,5 @@
 class Song < ApplicationRecord
-  include Keys, Matchable, Taggable
+  include Broadcastable, Keys, Matchable, Taggable
 
   enum :status, %w[ liked maybe ].index_by(&:itself), validate: true
   enum :sheet_format, %w[ chordpro ultimate_guitar ].index_by(&:itself), validate: true

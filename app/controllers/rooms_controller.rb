@@ -3,5 +3,7 @@ class RoomsController < ApplicationController
 
   # GET /
   def show
+    @room = Room.instance
+    @song = @room.current_song
   end
 end

@@ -1,0 +1,3 @@
+one:
+  guest_password_digest: <%= BCrypt::Password.create("jam-session") %>
+  guest_access_version: 1

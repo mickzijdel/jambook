@@ -14,6 +14,7 @@ At a jam, everyone looks up their own chord sheet. That means ads, paywalls, ver
 - **Room key and your own capo:** the host sets the key the room plays in. Each guest keeps their own capo per song, so when the key changes, their chords move and their capo stays put.
 - **One chord sheet per song,** hosted in the app and rendered in the browser. Paste ChordPro, chords over lyrics, or Ultimate Guitar text.
 - **Notes per song** that everyone sees and the host can edit mid-song.
+- **Auto-scroll** on each phone at its own speed, remembered per song. It isn't synced: a new song from the host stops it.
 - **Song list** with a status (*liked* or *maybe*) and tags, searchable on a phone.
 - **Import** a song list from CSV, your Ultimate Guitar saved tabs, or paste chord text into any song.
 - **Simple access:** guests type one shared password; the host logs in. Every page sits behind the password and asks search engines not to index it, because chord sheets usually contain copyrighted lyrics.

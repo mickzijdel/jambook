@@ -4,8 +4,9 @@ import { ChordLyricsPair, ChordProFormatter, ChordProParser, HtmlDivFormatter, T
 const UG_MARKUP = /\[\/?(ch|tab)\]/g
 // A chord symbol (G, F#m7b5, A7sus4, C/G). Section labels such as [Chorus] or [Verse 1] don't match.
 const CHORD = /^[A-G][#b]?(?:m|maj|min|dim|aug|sus|add|M)?\d*(?:(?:add|sus|maj|b|#)\d+)*(?:\/[A-G][#b]?)?$/
-// A tab staff line: an optional string name, a bar, then mostly dashes and fret marks (e|--0--|, A||-3-|), maybe "x8" after.
-const STAFF = /^\s*(?:[A-Ga-g][#b]?\s*)?[|:](?=(?:[^-]*-){3})[-0-9hpbrsx~/\\|().*^<>=\s]*(?:\s+\(?[xX×]\s*\d+\)?)?\s*$/
+// A tab staff line: an optional string name, a bar, then mostly dashes (long ones too) and fret marks
+// (e|--0--|, A||-3-|, F: 1-3-3-2-1-1), ending in a bar, a dash or a fret; then maybe a note ("x8", "let ring").
+const STAFF = /^\s*(?:[A-Ga-g][#b]?\s*)?[|:](?=(?:[^-]*-){3})[-—–0-9hpbrsx~/\\|().*^<>=\s]*[-—–|0-9](?:\s+\S.*)?\s*$/
 const TAB_START = /^\s*\{(?:start_of_tab|sot)(?::\s*([^}]*))?\}\s*$/
 const SECTION_LABEL = /^\s*\[([^\]]+)\]\s*$/
 const TAB_END = /^\s*\{(?:end_of_tab|eot)\}\s*$/

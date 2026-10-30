@@ -85,4 +85,50 @@ class TabBlocksTest < ApplicationSystemTestCase
 
     assert_equal 1, tops.uniq.size, "lyric tops differ: #{tops.inspect}"
   end
+
+  # Seen in What's Up: a chord after the last word dropped down beside the lyrics ("OohG").
+  test "a chord after the last word stays on the chord line" do
+    Room.instance.play(Song.create!(title: "End chord", artist: "Traditional", written_key: "G", sheet_format: "ultimate_guitar",
+      sheet: "[Interlude]\nG       Am   C             G\nOoh, Ooh Ooh"))
+    enter_guest_password
+
+    assert_selector "#sheet-output .chord", text: "Am"
+
+    tops = evaluate_script("[...document.querySelectorAll('#sheet-output .chord')].filter((el) => el.textContent.trim()).map((el) => Math.round(el.getBoundingClientRect().top))")
+
+    assert_equal [ 1, 4 ], [ tops.uniq.size, tops.size ], "chord tops: #{tops.inspect}"
+  end
+
+  # Seen in What's Up, Michelle and Greensleeves: a long stretch of words without a chord, or a web
+  # link, ran off the right edge of the phone.
+  test "long lines and links wrap on a phone instead of running off the screen" do
+    Room.instance.play(Song.create!(title: "Long line", artist: "Traditional", written_key: "C", sheet_format: "chordpro",
+      sheet: "I [C]scream from the top of my lungs, what's going on, and on and on and on\nhttps://en.wikipedia.org/wiki/A_page_about_a_song_(with_a_long_name)"))
+    enter_guest_password
+
+    assert_selector "#sheet-output .lyrics", text: "from the top"
+
+    overflow = evaluate_script("[...document.querySelectorAll('#sheet-output .lyrics')].some((el) => el.getBoundingClientRect().right > document.documentElement.clientWidth)")
+
+    assert_not overflow, "a lyric runs past the right edge of the screen"
+  end
+
+  # Seen in The Family Tree and Psycho Killer: these staffs were read as chord lines and ran off the screen.
+  test "a staff with long dashes or a note after its last bar is still a tab" do
+    Room.instance.play(Song.create!(title: "Odd staff", artist: "Traditional", written_key: "G", sheet_format: "ultimate_guitar",
+      sheet: "e|--5\u20143p5---|\nB|---3\u20133----|  let ring\nG|--0-------|"))
+    enter_guest_password
+
+    assert_selector "#sheet-output .tab-block", count: 1
+    assert_includes find("#sheet-output .tab-block").text, "let ring"
+  end
+
+  test "a chord chart written with bars isn't mistaken for a tab" do
+    Room.instance.play(Song.create!(title: "Bar chart", artist: "Traditional", written_key: "C", sheet_format: "ultimate_guitar",
+      sheet: "| C - - - | G - - - |\n| Am - - - | F - - - |"))
+    enter_guest_password
+
+    assert_text "Am - - -"
+    assert_no_selector "#sheet-output .tab-block"
+  end
 end

@@ -1,0 +1,30 @@
+# Public-domain songs only: never commit copyrighted lyrics.
+amazing_grace:
+  title: Amazing Grace
+  artist: John Newton
+  title_key: amazinggrace
+  status: liked
+  sheet_format: chordpro
+  sheet: "[G]Amazing [C]grace how [G]sweet the sound\nThat [G]saved a [D]wretch like me"
+  written_key: G
+  written_capo: 2
+  house_key: A
+
+rising_sun:
+  title: House of the Rising Sun
+  artist: Traditional
+  title_key: houseoftherisingsun
+  status: maybe
+  sheet_format: ultimate_guitar
+  sheet: "[Verse 1]\nAm       C        D          F\nThere is a house in New Orleans"
+  written_key: Am
+  written_capo: 0
+  house_key: Am
+
+no_key:
+  title: Scarborough Fair
+  artist: Traditional
+  title_key: scarboroughfair
+  status: maybe
+  sheet_format: ultimate_guitar
+  sheet: "Scarborough Fair\nAre you going to Scarborough Fair"

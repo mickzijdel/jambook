@@ -50,7 +50,21 @@ export default class extends Controller {
       writtenCapo: this.writtenCapoValue, key: this.keyValue, capo
     })
     this.outputTarget.innerHTML = html
+    this.fitTabs()
     this.statusTarget.textContent = transposed ? `${this.labelValue} ${this.keyValue} · your capo ${capo} · ${shownKey} shapes` : "Key unknown"
+  }
+
+  // Tab staffs never wrap: shrink each block until its longest line fits the screen.
+  fitTabs() {
+    if (!this.hasOutputTarget) return
+
+    for (const block of this.outputTarget.querySelectorAll(".tab-block")) {
+      block.style.fontSize = ""
+      if (block.scrollWidth > block.clientWidth) {
+        const size = parseFloat(getComputedStyle(block).fontSize) * block.clientWidth / block.scrollWidth
+        block.style.fontSize = `${Math.max(8, Math.floor(size * 10) / 10)}px`
+      }
+    }
   }
 
   get #capo() {

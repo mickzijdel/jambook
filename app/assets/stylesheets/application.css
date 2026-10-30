@@ -108,3 +108,18 @@ form textarea {
 .alert, .errors {
   color: var(--accent);
 }
+
+/* Tab staffs: monospace, never wrapped, shrunk to the screen width by chord_sheet_controller#fitTabs. */
+.sheet-output .tab-block {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  line-height: 1.25;
+  margin: 0 0 1rem;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.sheet-output .tab-note {
+  color: var(--muted);
+  font-size: 0.85em;
+  margin: 0 0 0.25rem;
+}

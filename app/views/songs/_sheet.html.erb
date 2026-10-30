@@ -1,7 +1,7 @@
 <%# locals: (song:, key:, label:) %>
 <div id="sheet"
      data-controller="chord-sheet"
-     data-action="turbo:morph@window->chord-sheet#render"
+     data-action="turbo:morph@window->chord-sheet#render resize@window->chord-sheet#fitTabs"
      data-chord-sheet-sheet-value="<%= song.sheet %>"
      data-chord-sheet-format-value="<%= song.sheet_format %>"
      data-chord-sheet-written-key-value="<%= song.written_key %>"

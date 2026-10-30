@@ -37,4 +37,12 @@
   <% end %>
   <%= render "songs/notes", song: song %>
   <div id="sheet-output" class="sheet-output" data-chord-sheet-target="output" data-turbo-permanent></div>
+
+  <%# This device's own auto-scroll, never synced (Mick's call). %>
+  <div class="autoscroll" data-controller="autoscroll" data-autoscroll-song-id-value="<%= song.id %>" data-action="turbo:morph@window->autoscroll#sync">
+    <button type="button" class="step" data-action="autoscroll#slower" aria-label="Scroll slower">−</button>
+    <output class="scroll-speed" data-autoscroll-target="speed" aria-label="Scroll speed"></output>
+    <button type="button" class="step" data-action="autoscroll#faster" aria-label="Scroll faster">+</button>
+    <button type="button" class="primary scroll-toggle" data-autoscroll-target="toggle" data-action="autoscroll#toggle">Scroll</button>
+  </div>
 </div>

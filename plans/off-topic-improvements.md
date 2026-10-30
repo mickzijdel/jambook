@@ -10,7 +10,6 @@ Noticed while building; not part of the plan.
 ## Deferred from the final review (2026-10-30)
 
 - Deleting any song refreshes every guest; a guest on the deleted song's own page gets a 404. Broadcast only when it was playing; send a missing song to `/`.
-- With browser storage blocked, the capo resets on Turbo navigation (the in-memory copy belongs to one controller instance). A module-level map would keep it per tab.
 - The "Now playing" banner isn't sticky and lacks "tap to join" (spec §6.3).
 - Notes lose their line breaks (`simple_format` or `white-space: pre-line`).
 - The search form drops the tag filter, and there's no tag control or way to clear it.

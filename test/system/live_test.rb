@@ -56,4 +56,21 @@ class LiveTest < ApplicationSystemTestCase
 
     assert_capo 1
   end
+
+  test "with storage blocked, the capo survives moving between pages" do
+    enter_guest_password
+
+    assert_capo 2
+    execute_script("Object.defineProperty(window, 'localStorage', { get() { throw new Error('blocked') } })")
+    click_on "Capo down one fret"
+
+    assert_capo 1
+
+    execute_script("Turbo.visit('/songs')")
+
+    assert_selector "h1", text: "Songs"
+    execute_script("Turbo.visit('/')")
+
+    assert_capo 1
+  end
 end

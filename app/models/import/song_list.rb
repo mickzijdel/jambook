@@ -17,7 +17,16 @@ class Import::SongList
 
   private
     def rows
-      CSV.parse(@io.read.force_encoding(Encoding::UTF_8).delete_prefix("﻿"), headers: true, strip: true, skip_blanks: true)
+      CSV.parse(utf8_text.delete_prefix("\uFEFF"), headers: true, strip: true, skip_blanks: true,
+        header_converters: ->(header) { header.to_s.strip.downcase })
+    rescue CSV::MalformedCSVError => error
+      raise Import::Unreadable, "it isn't valid CSV (#{error.message})"
+    end
+
+    # Excel's "CSV (Comma delimited)" on Windows saves Windows-1252, not UTF-8.
+    def utf8_text
+      text = @io.read.force_encoding(Encoding::UTF_8)
+      text.valid_encoding? ? text : text.force_encoding(Encoding::Windows_1252).encode(Encoding::UTF_8)
     end
 
     def import_row(row, line, result)
@@ -33,5 +42,7 @@ class Import::SongList
       else
         result.created << Song.create!(title: title, artist: artist, status: status, tag_names: tags)
       end
+    rescue ActiveRecord::RecordInvalid
+      result.skipped << line
     end
 end

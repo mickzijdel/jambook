@@ -5,7 +5,8 @@ module MusicKey
   KEYS = (MAJORS + MINORS).freeze
 
   NATURALS = { "C" => 0, "D" => 2, "E" => 4, "F" => 5, "G" => 7, "A" => 9, "B" => 11 }.freeze
-  CHORD_TOKEN = /\A[A-G][#b]?\S*\z/
+  # A chord symbol (G, F#m7b5, A7sus4, C/G); words like Chorus, Bridge or Amazing don't match.
+  CHORD = %r{\A[A-G][#b]?(?:m|maj|min|dim|aug|sus|add|M)?\d*(?:(?:add|sus|maj|b|#)\d+)*(?:/[A-G][#b]?)?\z}
 
   class << self
     def normalize(name)
@@ -39,9 +40,9 @@ module MusicKey
 
       def first_chord(sheet, format)
         if format == "chordpro"
-          sheet[/\[([A-G][^\]]*)\]/, 1]
+          sheet.scan(/\[([^\]\n]+)\]/).flatten.find { CHORD.match?(it) }
         else
-          chord_line = sheet.lines.map(&:split).find { |tokens| tokens.any? && tokens.all?(CHORD_TOKEN) }
+          chord_line = sheet.lines.map(&:split).find { |tokens| tokens.any? && tokens.all?(CHORD) }
           chord_line&.first
         end
       end

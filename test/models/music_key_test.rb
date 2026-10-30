@@ -32,6 +32,15 @@ class MusicKeyTest < ActiveSupport::TestCase
     assert_equal "C", MusicKey.guess("Cmaj7  F\nla la", "ultimate_guitar")
   end
 
+  test "guess skips words that only look like chords" do
+    assert_nil MusicKey.guess("Chorus\nAmazing Grace\nDear Abby", "ultimate_guitar")
+    assert_equal "G", MusicKey.guess("Chorus\nG  C  Dsus2  A7sus4\nla", "ultimate_guitar")
+  end
+
+  test "guess skips ChordPro labels in brackets" do
+    assert_equal "Em", MusicKey.guess("[Chorus]\n[Em7]la", "chordpro")
+  end
+
   test "guess finds nothing in plain lyrics" do
     assert_nil MusicKey.guess("A day in the life\nno chords here", "ultimate_guitar")
   end

@@ -3,6 +3,8 @@
 class Import::UgBundle
   def initialize(io)
     @entries = JSON.parse(io.read)
+  rescue JSON::ParserError => error
+    raise Import::Unreadable, "it isn't a bundle from ug:fetch (#{error.message})"
   end
 
   def import
@@ -23,6 +25,8 @@ class Import::UgBundle
         fill(song, entry, result)
         result.created << song
       end
+    rescue ActiveRecord::RecordInvalid
+      result.skipped << entry["title"]
     end
 
     # "Can play it now": an advanced tab comes in as a maybe.

@@ -17,6 +17,12 @@ class Song::MatchableTest < ActiveSupport::TestCase
     refute Song.same_artist?("Johnny Cash", "Nine Inch Nails")
   end
 
+  test "titles without Latin letters still get a match key" do
+    song = Song.create!(title: "Очи чёрные", artist: "Traditional")
+
+    assert_equal "очичёрные", song.title_key
+  end
+
   test "find_match needs title and artist to agree" do
     assert_equal songs(:amazing_grace), Song.find_match(title: "amazing grace!", artist: "John Newton")
     assert_nil Song.find_match(title: "Amazing Grace", artist: "Someone Else")

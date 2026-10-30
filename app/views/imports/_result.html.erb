@@ -32,5 +32,5 @@
 <% end %>
 
 <% if result.skipped.any? %>
-  <p>Skipped rows without a title or artist: <%= result.skipped.to_sentence %></p>
+  <p>Skipped (no usable title or artist): <%= result.skipped.to_sentence %></p>
 <% end %>

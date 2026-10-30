@@ -12,7 +12,12 @@ module Song::Matchable
   end
 
   class_methods do
+    # Falls back to the title's own letters when transliteration leaves nothing (Cyrillic, Greek, Japanese).
     def title_key(title)
+      latin_key(title).presence || title.to_s.downcase.gsub(/[^\p{Alnum}]/, "")
+    end
+
+    def latin_key(title)
       words = I18n.transliterate(title.to_s).downcase
         .gsub("&", " and ").gsub("aeroplane", "airplane").gsub(/\bpt\./, "part")
         .split(/[^a-z0-9]+/).reject(&:empty?)

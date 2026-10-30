@@ -19,6 +19,20 @@ export default class extends Controller {
     if (document.visibilityState === "visible") Turbo.session.refresh(location.href)
   }
 
+  // A refresh must never throw away what someone is typing: leave a form or frame with unsaved input alone.
+  keepUnsavedInput(event) {
+    const element = event.target
+    if (element.matches?.("form, turbo-frame") && this.#hasUnsavedInput(element)) event.preventDefault()
+  }
+
+  #hasUnsavedInput(container) {
+    return [ ...container.querySelectorAll("input, textarea, select") ].some((field) => {
+      if (field.type === "checkbox" || field.type === "radio") return field.checked !== field.defaultChecked
+      if (field.tagName === "SELECT") return [ ...field.options ].some((option) => option.selected !== option.defaultSelected)
+      return field.value !== field.defaultValue
+    })
+  }
+
   #check() {
     const source = this.element.querySelector("turbo-cable-stream-source")
     if (!source) return

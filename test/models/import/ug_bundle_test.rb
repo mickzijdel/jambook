@@ -35,6 +35,17 @@ class Import::UgBundleTest < ActiveSupport::TestCase
     assert_equal 1, result.needs_paste.size
   end
 
+  test "an entry that can't be saved is skipped and the rest import" do
+    result = import entry(title: "!!!", content: "C\nla"), entry(content: "C\nla")
+
+    assert_equal [ "The Water Is Wide" ], result.created.map(&:title)
+    assert_equal 1, result.skipped.size
+  end
+
+  test "a bundle that isn't JSON is refused" do
+    assert_raises(Import::Unreadable) { Import::UgBundle.new(StringIO.new("{not json")).import }
+  end
+
   private
     def entry(**attributes)
       { "url" => "https://tabs.ultimate-guitar.com/tab/traditional/the-water-is-wide-chords-1", "title" => "The Water Is Wide",

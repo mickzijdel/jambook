@@ -28,7 +28,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body data-controller="resync" data-action="visibilitychange@document->resync#refresh">
+  <body data-controller="resync" data-action="visibilitychange@document->resync#refresh turbo:before-morph-element->resync#keepUnsavedInput">
     <%= turbo_stream_from Room.instance if guest_access? %>
     <%= render "rooms/banner", page_song: @song unless controller_name == "rooms" %>
     <%= yield %>

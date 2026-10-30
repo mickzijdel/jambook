@@ -7,5 +7,8 @@ class Imports::UgBundlesController < ApplicationController
   def create
     @result = Import::UgBundle.new(params.expect(:file)).import
     render :create
+  rescue Import::Unreadable => error
+    flash.now[:alert] = "Jambook couldn't read that file: #{error.message}."
+    render :new, status: :unprocessable_entity
   end
 end

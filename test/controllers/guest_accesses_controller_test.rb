@@ -42,6 +42,18 @@ class GuestAccessesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "a full room of guests can all get in" do
+    20.times { enter_guest_password }
+
+    assert_redirected_to root_path
+  end
+
+  test "older iPhones are let in" do
+    get new_guest_access_path, headers: { "User-Agent" => "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1" }
+
+    assert_response :success
+  end
+
   test "password attempts are rate limited" do
     10.times { enter_guest_password("wrong") }
     enter_guest_password

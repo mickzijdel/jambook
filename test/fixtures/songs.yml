@@ -28,3 +28,15 @@ no_key:
   status: maybe
   sheet_format: ultimate_guitar
   sheet: "Scarborough Fair\nAre you going to Scarborough Fair"
+
+# Ultimate Guitar text with section labels: [Chorus] must stay a label, not a chord.
+auld_lang_syne:
+  title: Auld Lang Syne
+  artist: Robert Burns
+  title_key: auldlangsyne
+  status: maybe
+  sheet_format: ultimate_guitar
+  sheet: "[Intro]\nC  F\n\n[Chorus]\nG        C\nShould auld acquaintance be forgot"
+  written_key: C
+  written_capo: 0
+  house_key: C

@@ -2,6 +2,10 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
 require "turbo/broadcastable/test_helper"
+require "webmock/minitest"
+
+# No test reaches the real network; browser tests still talk to the local app server.
+WebMock.disable_net_connect!(allow_localhost: true)
 
 module ActiveSupport
   class TestCase

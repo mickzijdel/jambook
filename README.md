@@ -66,6 +66,21 @@ Lint and pre-commit checks run through [hk](https://hk.jdx.dev), installed by mi
 hk run check --all
 ```
 
+## Importing your Ultimate Guitar tabs (personal use)
+
+Ultimate Guitar has no public API, so this reads the pages your own browser sees. Use it for your own saved tabs.
+
+1. Open your [My tabs](https://www.ultimate-guitar.com/user/mytabs) page, logged in. Set the filter to "All" and scroll to the end of the list.
+2. Paste `script/ug/saved_tabs_snippet.js` into the browser console. It downloads `ug-saved-tabs.json` (links only, no tab contents).
+3. On your own computer (Ultimate Guitar often blocks servers):
+   ```sh
+   bin/rails "ug:urls[ug-saved-tabs.json,urls.txt]"   # chord sheets only, one per song
+   bin/rails "ug:fetch[urls.txt,bundle.json]"         # one page a second; safe to re-run
+   ```
+4. Upload `bundle.json` on Jambook's Import page.
+
+Paid (official) tabs are never downloaded: the most-voted free chords version of the same song is used instead, and the song keeps a link to the official one. A tab Ultimate Guitar rates "advanced" comes in as *maybe*. Imports only fill gaps: a song that already has a sheet keeps it.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

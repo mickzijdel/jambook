@@ -20,6 +20,7 @@ Rails.application.routes.draw do
 
   namespace :imports do
     resource :song_list, only: %i[ new create ]
+    resource :ug_bundle, only: %i[ new create ]
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

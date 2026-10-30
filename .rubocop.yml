@@ -4,3 +4,10 @@ inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 plugins:
   - rubocop-minitest
   - rubocop-mick
+
+AllCops:
+  NewCops: enable
+
+# One behaviour per test, at most 4 assertions (rails-toolkit:rails-testing).
+Minitest/MultipleAssertions:
+  Max: 4

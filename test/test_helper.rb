@@ -10,8 +10,7 @@ module ActiveSupport
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
-    include Turbo::Broadcastable::TestHelper
-
+    # turbo-rails includes Turbo::Broadcastable::TestHelper here itself (assert_turbo_stream_broadcasts).
     setup { Rails.cache.clear }
   end
 end

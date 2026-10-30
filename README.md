@@ -29,7 +29,7 @@ Jambook is one install per host. It is not a hosted multi-user service.
 - Hotwire: turbo-rails 2.0.23 and stimulus-rails 1.3.4
 - importmap-rails 2.2.3, so there is no JavaScript build step
 - Solid Cable 4.1.0 for live updates over Action Cable, stored in SQLite
-- [ChordSheetJS](https://github.com/martijnversluis/ChordSheetJS) 18.0.0 to parse, transpose and render chord sheets in the browser
+- [ChordSheetJS](https://github.com/martijnversluis/ChordSheetJS) 18.0.0 (GPL-2.0-only, see [NOTICE.md](NOTICE.md)) to parse, transpose and render chord sheets in the browser
 
 ## Setup
 
@@ -109,4 +109,6 @@ Paid (official) tabs are never downloaded: the most-voted free chords version of
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+Jambook's own code is MIT. See [LICENSE](LICENSE).
+
+It ships with ChordSheetJS, which is GPL-2.0-only, and fonts under the SIL Open Font License. If you redistribute Jambook with them, [NOTICE.md](NOTICE.md) says what that means.

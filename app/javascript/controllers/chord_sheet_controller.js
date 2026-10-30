@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { renderSheet } from "helpers/chord_sheet_helpers"
+import { recall, remember } from "helpers/device_store"
 import { wrapTab } from "helpers/tab_wrap"
 
 const MIN_TAB_SIZE = 14
@@ -16,7 +17,6 @@ export default class extends Controller {
     songId: Number
   }
 
-  #memory = new Map()
   // Firefox and Safari scroll a focused control to the nearest edge: keep it clear of the pinned header.
   #header = new ResizeObserver(([ entry ]) => {
     document.documentElement.style.scrollPaddingTop = `${entry.target.offsetHeight}px`
@@ -92,34 +92,12 @@ export default class extends Controller {
   }
 
   get #capo() {
-    const stored = this.#read()
+    const stored = recall(`capo:${this.songIdValue}`)
     return stored === null ? this.writtenCapoValue : Number(stored)
   }
 
   #setCapo(capo) {
-    this.#write(Math.min(11, Math.max(0, capo)))
+    remember(`capo:${this.songIdValue}`, Math.min(11, Math.max(0, capo)))
     this.render()
-  }
-
-  get #storageKey() {
-    return `capo:${this.songIdValue}`
-  }
-
-  // Private browsing can make localStorage throw; the in-memory copy then lasts the page's lifetime.
-  #read() {
-    try {
-      return localStorage.getItem(this.#storageKey) ?? this.#memory.get(this.#storageKey) ?? null
-    } catch {
-      return this.#memory.get(this.#storageKey) ?? null
-    }
-  }
-
-  #write(capo) {
-    this.#memory.set(this.#storageKey, String(capo))
-    try {
-      localStorage.setItem(this.#storageKey, capo)
-    } catch {
-      console.info("Capo kept for this page only: browser storage is blocked.")
-    }
   }
 }

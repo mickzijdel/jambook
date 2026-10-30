@@ -9,13 +9,16 @@ class TabBlocksTest < ApplicationSystemTestCase
     assert_includes find("#sheet-output .tab-block", match: :first).text, "B|---1---1---|"
   end
 
-  test "a tab wider than the phone shrinks to fit" do
+  test "a tab wider than the phone breaks into parts that fit at a readable size" do
     Room.instance.play(songs(:greensleeves))
     enter_guest_password
 
     assert_selector "#sheet-output .tab-block", count: 2
+    solo = find("#sheet-output .tab-block-wrap", text: "Solo").find(".tab-block")
 
+    assert_equal 2, solo.text.scan(/^e\|/).size, solo.text
     assert evaluate_script("[...document.querySelectorAll('.tab-block')].every((el) => el.scrollWidth <= el.clientWidth + 1)")
+    assert evaluate_script("[...document.querySelectorAll('.tab-block')].every((el) => parseFloat(getComputedStyle(el).fontSize) >= 14)")
   end
 
   test "tabs stay as written and say so when the chords move" do

@@ -1,5 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 import { renderSheet } from "helpers/chord_sheet_helpers"
+import { wrapTab } from "helpers/tab_wrap"
+
+const MIN_TAB_SIZE = 14
 
 // Renders a chord sheet in the given key, shifted down by this viewer's own capo for this song.
 export default class extends Controller {
@@ -50,19 +53,29 @@ export default class extends Controller {
     })
     this.outputTarget.innerHTML = html
     this.fitTabs()
+    // The first fit measures the fallback font if Chivo Mono is still loading.
+    document.fonts.ready.then(() => this.fitTabs())
     if (this.hasCapoTarget) this.capoTarget.textContent = capo
     this.statusTarget.textContent = transposed ? `you play ${shownKey} shapes` : "Key unknown, chords as written"
   }
 
-  // Tab staffs never wrap: shrink each block until its longest line fits the screen.
+  // A tab that fits the screen at 14px or more shrinks to fit; a wider one breaks at its bar lines
+  // first, and any part still too wide shrinks (down to 8px, Mick's call over a size floor).
   fitTabs() {
     if (!this.hasOutputTarget) return
 
     for (const block of this.outputTarget.querySelectorAll(".tab-block")) {
+      block.dataset.staff ??= block.textContent
+      block.textContent = block.dataset.staff
       block.style.fontSize = ""
+      const size = parseFloat(getComputedStyle(block).fontSize)
+      if (size * block.clientWidth < MIN_TAB_SIZE * block.scrollWidth) {
+        const lines = block.dataset.staff.split("\n")
+        const columns = Math.floor(block.clientWidth * Math.max(...lines.map((line) => line.length)) / block.scrollWidth)
+        block.textContent = wrapTab(lines, columns).join("\n")
+      }
       if (block.scrollWidth > block.clientWidth) {
-        const size = parseFloat(getComputedStyle(block).fontSize) * block.clientWidth / block.scrollWidth
-        block.style.fontSize = `${Math.max(8, Math.floor(size * 10) / 10)}px`
+        block.style.fontSize = `${Math.max(8, Math.floor(size * block.clientWidth / block.scrollWidth * 10) / 10)}px`
       }
     }
   }

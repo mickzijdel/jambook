@@ -152,7 +152,9 @@ form.button_to { display: inline-flex; margin: 0; }
 .sheet-output .column { display: flex; flex-direction: column; }
 /* One fixed height for every chord cell, with or without a chord, so lyrics share a baseline. */
 .sheet-output .chord { color: var(--accent); font: 700 var(--lyric-size)/1.3 var(--font-mono); height: 1.3em; padding-right: 0.3em; white-space: pre; }
-.sheet-output .lyrics { font-size: var(--lyric-size); line-height: 1.45; white-space: pre; }
+/* pre-wrap keeps the spaces between pieces and lets a long stretch without chords wrap on a phone;
+   overflow-wrap breaks a word, such as a web link, only when it is wider than the screen. */
+.sheet-output .lyrics { font-size: var(--lyric-size); line-height: 1.45; overflow-wrap: anywhere; white-space: pre-wrap; }
 .sheet-output .label { border-bottom: 2px solid var(--muted); display: inline-block; font: 400 26px/1.1 var(--font-hand); margin: 0 0 var(--space-2); }
 .sheet-output .comment { color: var(--muted); font-style: italic; }
 .sheet-output .sheet-plain { font: 400 16px/1.5 var(--font-mono); white-space: pre-wrap; }

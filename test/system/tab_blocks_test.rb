@@ -98,4 +98,18 @@ class TabBlocksTest < ApplicationSystemTestCase
 
     assert_equal [ 1, 4 ], [ tops.uniq.size, tops.size ], "chord tops: #{tops.inspect}"
   end
+
+  # Seen in What's Up, Michelle and Greensleeves: a long stretch of words without a chord, or a web
+  # link, ran off the right edge of the phone.
+  test "long lines and links wrap on a phone instead of running off the screen" do
+    Room.instance.play(Song.create!(title: "Long line", artist: "Traditional", written_key: "C", sheet_format: "chordpro",
+      sheet: "I [C]scream from the top of my lungs, what's going on, and on and on and on\nhttps://en.wikipedia.org/wiki/A_page_about_a_song_(with_a_long_name)"))
+    enter_guest_password
+
+    assert_selector "#sheet-output .lyrics", text: "from the top"
+
+    overflow = evaluate_script("[...document.querySelectorAll('#sheet-output .lyrics')].some((el) => el.getBoundingClientRect().right > document.documentElement.clientWidth)")
+
+    assert_not overflow, "a lyric runs past the right edge of the screen"
+  end
 end

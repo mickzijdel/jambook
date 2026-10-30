@@ -1,5 +1,10 @@
 <div data-controller="wake-lock" data-action="visibilitychange@document->wake-lock#acquire"></div>
 
+<p class="install-hint" data-controller="install-hint" hidden>
+  Add Jambook to your home screen: Share → Add to Home Screen.
+  <button type="button" data-action="install-hint#dismiss">OK</button>
+</p>
+
 <% if @song %>
   <h1><%= @song.title %> – <%= @song.artist %></h1>
   <p id="room-key">Room key <%= @room.room_key %></p>

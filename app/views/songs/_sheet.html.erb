@@ -1,5 +1,7 @@
 <%# locals: (song:, key:, label:) %>
 <div id="sheet"
+     data-controller="chord-sheet"
+     data-action="turbo:morph@window->chord-sheet#render"
      data-chord-sheet-sheet-value="<%= song.sheet %>"
      data-chord-sheet-format-value="<%= song.sheet_format %>"
      data-chord-sheet-written-key-value="<%= song.written_key %>"
@@ -8,5 +10,9 @@
      data-chord-sheet-song-id-value="<%= song.id %>"
      data-chord-sheet-label-value="<%= label %>">
   <p class="sheet-status" data-chord-sheet-target="status"></p>
+  <div class="capo">
+    <button type="button" data-action="chord-sheet#capoDown">capo −</button>
+    <button type="button" data-action="chord-sheet#capoUp">capo +</button>
+  </div>
   <div id="sheet-output" class="sheet-output" data-chord-sheet-target="output" data-turbo-permanent></div>
 </div>

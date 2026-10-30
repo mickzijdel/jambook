@@ -1,4 +1,4 @@
-<h1>Import a song list</h1>
+<header class="page-head"><h1>Import a song list</h1></header>
 
 <%= tag.p(flash[:alert], class: "alert") if flash[:alert] %>
 <p><%= link_to "Or import Ultimate Guitar tabs", new_imports_ug_bundle_path %></p>
@@ -8,5 +8,5 @@
 <%= form_with url: imports_song_list_path, multipart: true do |form| %>
   <%= form.label :file, "CSV file" %>
   <%= form.file_field :file, accept: ".csv,text/csv", required: true %>
-  <%= form.submit "Import" %>
+  <%= form.submit "Import", class: "primary" %>
 <% end %>

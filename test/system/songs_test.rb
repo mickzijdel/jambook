@@ -23,7 +23,7 @@ class SongsTest < ApplicationSystemTestCase
     using_session(:guest) do
       enter_guest_password
 
-      assert_text "your capo 2"
+      assert_text "Your capo 2"
       execute_script("window.scrollTo(0, 400)")
     end
     using_session(:host) do
@@ -32,7 +32,8 @@ class SongsTest < ApplicationSystemTestCase
       within("li.song", text: "Rising Sun") { click_on "Play now" }
     end
     using_session(:guest) do
-      assert_text "Room key Am · your capo 0 · Am shapes"
+      assert_selector "#room-key .key", text: "Am"
+      assert_text "Your capo 0 · you play Am shapes"
       assert_equal 0, evaluate_script("window.scrollY")
     end
   end
@@ -42,7 +43,7 @@ class SongsTest < ApplicationSystemTestCase
     using_session(:guest) do
       enter_guest_password
 
-      assert_text "your capo 2"
+      assert_text "Your capo 2"
       execute_script("#{cable}.close({ allowReconnect: false })")
     end
     using_session(:host) do
@@ -53,7 +54,7 @@ class SongsTest < ApplicationSystemTestCase
     using_session(:guest) do
       execute_script("#{cable}.open()")
 
-      assert_text "Room key Bb"
+      assert_selector "#room-key .key", text: "Bb"
     end
   end
 end

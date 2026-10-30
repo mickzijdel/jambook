@@ -10,8 +10,7 @@ export default class extends Controller {
     writtenKey: String,
     writtenCapo: { type: Number, default: 0 },
     key: String,
-    songId: Number,
-    label: { type: String, default: "Key" }
+    songId: Number
   }
 
   #memory = new Map()
@@ -51,7 +50,7 @@ export default class extends Controller {
     })
     this.outputTarget.innerHTML = html
     this.fitTabs()
-    this.statusTarget.textContent = transposed ? `${this.labelValue} ${this.keyValue} · your capo ${capo} · ${shownKey} shapes` : "Key unknown"
+    this.statusTarget.textContent = transposed ? `Your capo ${capo} · you play ${shownKey} shapes` : "Key unknown, chords as written"
   }
 
   // Tab staffs never wrap: shrink each block until its longest line fits the screen.

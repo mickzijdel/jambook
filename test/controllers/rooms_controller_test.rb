@@ -13,7 +13,7 @@ class RoomsControllerTest < ActionDispatch::IntegrationTest
     enter_guest_password
     get root_path
 
-    assert_select "h1", "Amazing Grace – John Newton"
+    assert_select "h1", "Amazing Grace"
     assert_select "#sheet[data-chord-sheet-key-value=?]", "A"
   end
 

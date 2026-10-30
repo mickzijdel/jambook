@@ -1,4 +1,4 @@
-<%# locals: (song:, key:, label:) %>
+<%# locals: (song:, key:) %>
 <div id="sheet"
      data-controller="chord-sheet"
      data-action="turbo:morph@window->chord-sheet#render resize@window->chord-sheet#fitTabs"
@@ -7,12 +7,13 @@
      data-chord-sheet-written-key-value="<%= song.written_key %>"
      data-chord-sheet-written-capo-value="<%= song.written_capo %>"
      data-chord-sheet-key-value="<%= key %>"
-     data-chord-sheet-song-id-value="<%= song.id %>"
-     data-chord-sheet-label-value="<%= label %>">
-  <p class="sheet-status" data-chord-sheet-target="status"></p>
-  <div class="capo">
-    <button type="button" data-action="chord-sheet#capoDown">capo −</button>
-    <button type="button" data-action="chord-sheet#capoUp">capo +</button>
+     data-chord-sheet-song-id-value="<%= song.id %>">
+  <div class="sheet-bar">
+    <p class="sheet-status" data-chord-sheet-target="status" aria-live="polite"></p>
+    <div class="capo">
+      <button type="button" data-action="chord-sheet#capoDown" aria-label="Capo down one fret">capo −</button>
+      <button type="button" data-action="chord-sheet#capoUp" aria-label="Capo up one fret">capo +</button>
+    </div>
   </div>
   <div id="sheet-output" class="sheet-output" data-chord-sheet-target="output" data-turbo-permanent></div>
 </div>

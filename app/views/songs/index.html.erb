@@ -1,28 +1,41 @@
-<h1>Songs</h1>
-<% if authenticated? %>
-  <nav class="host-nav"><%= link_to "Add a song", new_song_path %> <%= link_to "Import", new_imports_song_list_path %> <%= link_to "Settings", edit_settings_path %></nav>
-<% end %>
+<header class="list-head">
+  <h1>Songs</h1>
+  <% if authenticated? %>
+    <nav class="host-nav row-of-buttons" aria-label="Host">
+      <%= link_to "Add a song", new_song_path, class: "button ghost" %>
+      <%= link_to "Import", new_imports_song_list_path, class: "button ghost" %>
+      <%= link_to "Settings", edit_settings_path, class: "button ghost" %>
+    </nav>
+  <% end %>
+</header>
 
 <%= form_with url: songs_path, method: :get, class: "song-filters" do |form| %>
   <%= form.label :q, "Search" %>
   <%= form.search_field :q, value: params[:q] %>
   <%= form.label :status, "Status" %>
   <%= form.select :status, Song.statuses.keys, { include_blank: "Any", selected: params[:status] } %>
-  <%= form.submit "Filter" %>
+  <%= hidden_field_tag :tag, params[:tag] if params[:tag].present? %>
+  <%= form.submit "Filter", class: "filter-submit" %>
+<% end %>
+
+<% if params[:tag].present? %>
+  <p class="active-tag">Tagged <strong><%= params[:tag] %></strong>. <%= link_to "Show all songs", songs_path(q: params[:q].presence, status: params[:status].presence) %></p>
 <% end %>
 
 <ul class="songs">
   <% @songs.each do |song| %>
     <li class="song">
-      <%= link_to "#{song.title} – #{song.artist}", song %>
-      <span class="status"><%= song.status %></span>
-      <% song.tag_names.each do |name| %>
-        <%= link_to name, songs_path(tag: name), class: "tag" %>
-      <% end %>
-      <%= tag.strong("Now playing") if song.id == @playing_song_id %>
+      <%= link_to song, class: "song-link" do %><%= song.title %> <span class="by"><%= song.artist %></span><% end %>
+      <div class="meta">
+        <% if song.id == @playing_song_id %><span class="playing">Now playing</span><% end %>
+        <span><%= song.status %></span>
+        <% song.tag_names.each do |name| %>
+          <%= link_to name, songs_path(tag: name) %>
+        <% end %>
+        <% if authenticated? && song.needs_paste? %><span>needs a pasted sheet</span><% end %>
+      </div>
       <% if authenticated? %>
-        <%= tag.span("needs paste", class: "badge") if song.needs_paste? %>
-        <%= button_to "Play now", song_play_path(song) %>
+        <div class="song-actions"><%= button_to "Play now", song_play_path(song) %></div>
       <% end %>
     </li>
   <% end %>

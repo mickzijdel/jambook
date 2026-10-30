@@ -1,6 +1,8 @@
 <%# locals: (room:) %>
-<nav class="host-controls" aria-label="Host controls">
-  <%= button_to "key −", room_key_path(delta: -1), method: :patch %>
-  <%= button_to "key +", room_key_path(delta: 1), method: :patch %>
-  <%= link_to "Pick next song", songs_path %>
+<nav class="host-controls row-of-buttons" aria-label="Host controls">
+  <% if room.room_key %>
+    <%= button_to "key −", room_key_path(delta: -1), method: :patch, "aria-label": "Key down a semitone" %>
+    <%= button_to "key +", room_key_path(delta: 1), method: :patch, "aria-label": "Key up a semitone" %>
+  <% end %>
+  <%= link_to "Pick next song", songs_path, class: "button ghost" %>
 </nav>

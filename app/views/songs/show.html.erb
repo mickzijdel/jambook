@@ -1,11 +1,21 @@
-<h1><%= @song.title %> – <%= @song.artist %></h1>
-<%= render "songs/notes", song: @song %>
-<p class="links">
+<header class="song-head">
+  <div>
+    <h1><%= @song.title %></h1>
+    <p class="artist"><%= @song.artist %></p>
+  </div>
+  <% if @song.house_key %>
+    <p class="keybox"><span class="key-label">Key</span> <span class="key"><%= @song.house_key %></span></p>
+  <% end %>
+</header>
+
+<div class="host-controls row-of-buttons">
+  <% if authenticated? %>
+    <%= button_to "Play now", song_play_path(@song), class: "primary" %>
+    <%= link_to "Edit song", edit_song_path(@song), class: "button ghost" %>
+  <% end %>
   <%= web_link_to "Listen", @song.listen_url %>
   <%= web_link_to "Ultimate Guitar", @song.ug_url %>
-</p>
-<% if authenticated? %>
-  <%= button_to "Play now", song_play_path(@song) %>
-  <%= link_to "Edit song", edit_song_path(@song) %>
-<% end %>
-<%= render "songs/sheet", song: @song, key: @song.house_key, label: "Key" %>
+</div>
+
+<%= render "songs/notes", song: @song %>
+<%= render "songs/sheet", song: @song, key: @song.house_key %>

@@ -1,125 +1,194 @@
-/* Phone-first, dark by default: jams happen in the evening. */
+/* design-process · A pub chalkboard · type: Fredericka the Great + Caveat Brush + Chivo/Chivo Mono · palette: slate/chalk/amber · brief: docs/design/brief.md */
+
+@font-face { font-family: "Chivo"; src: url("/chivo-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Chivo"; src: url("/chivo-latin-ext.woff2") format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Chivo Mono"; src: url("/chivo-mono-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Chivo Mono"; src: url("/chivo-mono-latin-ext.woff2") format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Fredericka the Great"; src: url("/fredericka-the-great-latin.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Caveat Brush"; src: url("/caveat-brush-latin.woff2") format("woff2"); font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Caveat Brush"; src: url("/caveat-brush-latin-ext.woff2") format("woff2"); font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
 :root {
   color-scheme: dark;
-  --bg: #111;
-  --fg: #eee;
-  --muted: #9a9a9a;
-  --accent: #f5c542;
+  --ground: #1c2420;
+  --raised: #252f2a;
+  --ink: #ece8dd;
+  --muted: #a3ada6;
+  --accent: #f2b347;
+  --on-accent: #1c2420;
+  --line: #36423c;
+  --chalk-blend: screen;
+  --chalk-filter: none;
+
+  --font-text: "Chivo", system-ui, sans-serif;
+  --font-mono: "Chivo Mono", ui-monospace, monospace;
+  --font-chalk: "Fredericka the Great", "Chivo", serif;
+  --font-hand: "Caveat Brush", "Chivo", cursive;
+
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --radius: 6px;
 }
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --ground: #e6ebe7;
+    --raised: #d6ddd8;
+    --ink: #18221d;
+    --muted: #4f5c55;
+    --accent: #8f4f00;
+    --on-accent: #f4f6f4;
+    --line: #bfc9c2;
+    --chalk-blend: multiply;
+    --chalk-filter: invert(1);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--ground); scrollbar-color: var(--line) var(--ground); }
 
 body {
-  background: var(--bg);
-  color: var(--fg);
-  font: 18px/1.5 system-ui, sans-serif;
+  background: var(--ground);
+  caret-color: var(--accent);
+  color: var(--ink);
+  font: 400 17px/1.5 var(--font-text);
   margin: 0 auto;
-  max-width: 48rem;
-  padding: 1rem;
+  max-width: 44rem;
+  padding: 0 var(--space-4) 96px;
 }
 
-button {
-  font: inherit;
-  min-height: 2.75rem;
-  min-width: 2.75rem;
-}
+::selection { background: var(--accent); color: var(--on-accent); }
 
-.host-controls, .capo {
-  display: flex;
-  gap: 0.5rem;
-}
+a { color: var(--ink); text-underline-offset: 3px; }
 
-.sheet-status {
-  color: var(--muted);
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+h1, h2 { font-family: var(--font-chalk); font-weight: 400; line-height: 1.05; margin: 0; }
+h1 { font-size: 36px; }
+h2 { font-size: 26px; margin-top: var(--space-6); }
+
+p { margin: 0 0 var(--space-3); }
+
+.muted { color: var(--muted); }
+
+/* Buttons and button-like links: neutral by default, amber only for the one main action. */
+button, .button, input[type="submit"] {
+  align-items: center;
+  background: var(--raised);
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  font: 600 16px/1 var(--font-text);
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  text-decoration: none;
 }
+button:active, .button:active, input[type="submit"]:active { transform: scale(0.97); }
+.button.ghost { background: transparent; box-shadow: inset 0 0 0 2px var(--line); }
+.button.primary, input[type="submit"].primary, button.primary { background: var(--accent); color: var(--on-accent); }
+form.button_to { display: inline-flex; margin: 0; }
+
+.row-of-buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+/* Room and song pages: title and the big chalk key stay pinned while the sheet scrolls. */
+.song-head {
+  align-items: end;
+  background: var(--ground);
+  border-bottom: 2px solid var(--line);
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr auto;
+  padding: var(--space-4) 0 var(--space-3);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.song-head .artist { color: var(--muted); margin: var(--space-1) 0 0; }
+.keybox { text-align: center; }
+.keybox .key-label { color: var(--muted); display: block; font-size: 13px; }
+.keybox .key { color: var(--accent); display: block; font: 400 60px/0.95 var(--font-chalk); }
+
+.host-controls { margin: var(--space-4) 0 0; }
+
+#notes { color: var(--muted); font-style: italic; margin: var(--space-4) 0 var(--space-2); white-space: pre-line; }
+#notes:empty { display: none; }
+
+.sheet-bar { align-items: center; display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: space-between; margin: var(--space-4) 0 var(--space-5); }
+.sheet-status { font-weight: 500; margin: 0; }
+.capo { display: flex; gap: var(--space-2); }
 
 /* ChordSheetJS HtmlDivFormatter: chords sit above the lyrics they belong to. */
-.sheet-output .paragraph {
-  margin-bottom: 1rem;
-}
-
-.sheet-output .row {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.sheet-output .column {
-  display: flex;
-  flex-direction: column;
-}
-
-.sheet-output .chord {
-  color: var(--accent);
-  font-weight: 700;
-  min-height: 1.5em;
-  padding-right: 0.3em;
-  white-space: pre;
-}
-
-.sheet-output .lyrics {
-  white-space: pre;
-}
-
-.sheet-output .label, .sheet-output .comment {
-  color: var(--muted);
-  font-style: italic;
-}
-
-.banner a {
-  color: var(--accent);
-}
-
-.songs {
-  list-style: none;
-  padding: 0;
-}
-
-.song {
-  align-items: center;
-  border-bottom: 1px solid #333;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-}
-
-.song .status, .song .tag, .song .badge {
-  color: var(--muted);
-  font-size: 0.85em;
-}
-
-a {
-  color: var(--fg);
-}
-
-form label {
-  display: block;
-  margin-top: 0.75rem;
-}
-
-form input, form select, form textarea {
-  box-sizing: border-box;
-  font: inherit;
-  width: 100%;
-}
-
-form textarea {
-  font-family: ui-monospace, monospace;
-}
-
-.alert, .errors {
-  color: var(--accent);
-}
+.sheet-output .paragraph { margin-bottom: var(--space-5); }
+.sheet-output .row { align-items: flex-end; display: flex; flex-wrap: wrap; }
+.sheet-output .column { display: flex; flex-direction: column; }
+/* One fixed height for every chord cell, with or without a chord, so lyrics share a baseline. */
+.sheet-output .chord { color: var(--accent); font: 700 18px/1.35 var(--font-mono); height: 1.35em; padding-right: 0.3em; white-space: pre; }
+.sheet-output .lyrics { font-size: 18px; line-height: 1.5; white-space: pre; }
+.sheet-output .label { border-bottom: 3px solid var(--accent); display: inline-block; font: 400 26px/1.1 var(--font-hand); margin: 0 0 var(--space-2); padding-bottom: 1px; }
+.sheet-output .comment { color: var(--muted); font-style: italic; }
+.sheet-output .sheet-plain { font: 400 16px/1.5 var(--font-mono); white-space: pre-wrap; }
 
 /* Tab staffs: monospace, never wrapped, shrunk to the screen width by chord_sheet_controller#fitTabs. */
-.sheet-output .tab-block {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
-  line-height: 1.25;
-  margin: 0 0 1rem;
-  overflow-x: auto;
-  white-space: pre;
-}
+.sheet-output .tab-block { font: 400 16px/1.25 var(--font-mono); margin: 0 0 var(--space-5); overflow-x: auto; white-space: pre; }
+.sheet-output .tab-note { color: var(--muted); font-size: 14px; margin: 0 0 var(--space-1); }
 
-.sheet-output .tab-note {
-  color: var(--muted);
-  font-size: 0.85em;
-  margin: 0 0 0.25rem;
+/* The chalk sketch: white chalk on black, blended onto the slate; inverted for the light theme. */
+.chalk-sketch { display: block; filter: var(--chalk-filter); height: auto; margin: var(--space-5) auto var(--space-4); mix-blend-mode: var(--chalk-blend); max-width: 100%; }
+
+.empty-room, .door { padding-top: var(--space-6); text-align: center; }
+.empty-room .chalk-sketch { width: 220px; }
+.door .chalk-sketch { width: 260px; }
+.door h1 { font-size: 48px; }
+.door form { margin: var(--space-5) auto 0; max-width: 20rem; text-align: left; }
+
+/* Song list. */
+.list-head { padding: var(--space-5) 0 var(--space-3); }
+.host-nav { margin: var(--space-3) 0 0; }
+.song-filters { align-items: end; display: grid; gap: var(--space-2); grid-template-columns: 1fr auto auto; margin: var(--space-4) 0; }
+.song-filters label { color: var(--muted); font-size: 13px; grid-row: 1; margin: 0; }
+.song-filters input, .song-filters select { grid-row: 2; }
+.song-filters .filter-submit { grid-row: 2; }
+.active-tag { margin: 0 0 var(--space-3); }
+.songs { list-style: none; margin: 0; padding: 0; }
+.song { align-items: center; border-bottom: 1px solid var(--line); display: grid; gap: var(--space-1) var(--space-3); grid-template-columns: 1fr auto; padding: var(--space-3) 0; }
+.song .song-link { font-weight: 600; text-decoration: none; }
+.song .song-link .by { color: var(--muted); font-weight: 400; }
+.song .meta { color: var(--muted); display: flex; flex-wrap: wrap; font-size: 14px; gap: var(--space-2); grid-column: 1; }
+.song .meta a { color: var(--muted); }
+.song .playing { color: var(--accent); font-weight: 700; }
+.song .song-actions { grid-column: 2; grid-row: 1 / span 2; }
+
+/* Now playing: pinned to the bottom on every page but the room. */
+.banner { bottom: 0; left: 0; padding: var(--space-3) var(--space-4) var(--space-4); position: fixed; right: 0; z-index: 2; }
+.banner a { background: var(--accent); border-radius: var(--radius); color: var(--on-accent); display: block; font-weight: 700; margin: 0 auto; max-width: 44rem; padding: var(--space-3) var(--space-4); text-decoration: none; }
+
+/* Forms. */
+form label { color: var(--muted); display: block; font-size: 14px; font-weight: 600; margin: var(--space-4) 0 var(--space-1); }
+input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="url"], input[type="number"], input[type="file"], select, textarea {
+  background: var(--raised);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  color: var(--ink);
+  font: 400 17px/1.4 var(--font-text);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible { border-color: var(--accent); outline: none; }
+textarea { font-family: var(--font-mono); font-size: 15px; }
+form input[type="submit"] { margin-top: var(--space-5); }
+.alert, .errors { color: var(--accent); font-weight: 600; }
+.errors { padding-left: var(--space-4); }
+.notice { color: var(--muted); }
+.page-head { padding: var(--space-5) 0 0; }
+
+.install-hint { background: var(--raised); border-radius: var(--radius); margin: var(--space-4) 0 0; padding: var(--space-3) var(--space-4); }
+.install-hint button { margin-left: var(--space-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  button:active, .button:active, input[type="submit"]:active { transform: none; }
 }

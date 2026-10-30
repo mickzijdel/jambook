@@ -2,7 +2,7 @@
 
 A self-hosted songbook for house jam sessions. The host picks the song on their phone, and every guest's phone follows: same song, same key, with each guest's own capo.
 
-> **Status: under construction.** The Rails app is scaffolded and the design is settled, but most of what this README describes is not built yet. Self-hosting instructions come with the first release.
+> **Status: early.** Everything below is built and tested, but it has not been used at a real jam yet.
 
 ## Why
 
@@ -10,14 +10,12 @@ At a jam, everyone looks up their own chord sheet. That means ads, paywalls, ver
 
 ## Features
 
-Planned for the first release:
-
 - **Now playing:** the host taps a song, and every guest's screen switches to it within about a second.
 - **Room key and your own capo:** the host sets the key the room plays in. Each guest keeps their own capo per song, so when the key changes, their chords move and their capo stays put.
 - **One chord sheet per song,** hosted in the app and rendered in the browser. Paste ChordPro, chords over lyrics, or Ultimate Guitar text.
 - **Notes per song** that everyone sees and the host can edit mid-song.
 - **Song list** with a status (*liked* or *maybe*) and tags, searchable on a phone.
-- **Import** a song list from CSV, or paste chord text into any song.
+- **Import** a song list from CSV, your Ultimate Guitar saved tabs, or paste chord text into any song.
 - **Simple access:** guests type one shared password; the host logs in. Every page sits behind the password and asks search engines not to index it, because chord sheets usually contain copyrighted lyrics.
 - **Installable** on a phone's home screen as a web app.
 
@@ -31,7 +29,7 @@ Jambook is one install per host. It is not a hosted multi-user service.
 - Hotwire: turbo-rails 2.0.23 and stimulus-rails 1.3.4
 - importmap-rails 2.2.3, so there is no JavaScript build step
 - Solid Cable 4.1.0 for live updates over Action Cable, stored in SQLite
-- [ChordSheetJS](https://github.com/martijnversluis/ChordSheetJS) 18.0.0 (planned) to parse, transpose and render chord sheets in the browser
+- [ChordSheetJS](https://github.com/martijnversluis/ChordSheetJS) 18.0.0 to parse, transpose and render chord sheets in the browser
 
 ## Setup
 
@@ -65,6 +63,33 @@ Lint and pre-commit checks run through [hk](https://hk.jdx.dev), installed by mi
 ```sh
 hk run check --all
 ```
+
+## Self-hosting
+
+Jambook deploys with [Kamal](https://kamal-deploy.org) to one server, with SQLite on a Docker volume.
+
+1. Copy `config/deploy.example.yml` to `config/deploy.<name>.yml` (gitignored) and fill in your server, domain and registry.
+2. Point your domain's DNS at the server, then run:
+   ```sh
+   KAMAL_REGISTRY_PASSWORD=<registry token> bin/kamal setup -d <name>
+   ```
+   Kamal reads `RAILS_MASTER_KEY` from `config/master.key` (see `.kamal/secrets`).
+3. Create your host login and set the guest password:
+   ```sh
+   bin/kamal app exec -d <name> -i "bin/rails jambook:host EMAIL=you@example.com"
+   ```
+   Then sign in at `/session/new` and open Settings from the song list.
+
+## Importing a song list
+
+On the Import page, upload a CSV with this header:
+
+```csv
+title,artist,status,tags
+Amazing Grace,John Newton,liked,hymn;slow
+```
+
+`status` is `liked` or `maybe` (blank means `maybe`). Separate tags with `;`. Songs that already exist gain the tags; nothing is overwritten.
 
 ## Importing your Ultimate Guitar tabs (personal use)
 

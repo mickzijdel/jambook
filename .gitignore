@@ -46,3 +46,4 @@
 # In-repo worktrees
 /.worktrees/
 /.claude/worktrees/
+!/config/deploy.example.yml

@@ -1,0 +1,17 @@
+# Copy to config/deploy.<name>.yml (gitignored) and fill in your own details.
+servers:
+  web:
+    - 203.0.113.10
+
+proxy:
+  host: jam.example.com
+
+image: your-github-user/jambook
+registry:
+  server: ghcr.io
+  username: your-github-user
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+ssh:
+  user: deploy

@@ -46,6 +46,9 @@ class Ug::Fetcher
       else
         { "url" => url, "official_url" => official_url, "error" => "HTTP #{response.code}" }
       end
+    rescue JSON::ParserError, TypeError, NoMethodError => error
+      # One odd page shouldn't stop a run of a hundred; it stays in the bundle as an error.
+      { "url" => url, "official_url" => official_url, "error" => "unreadable page: #{error.class}" }
     end
 
     def free_stand_in(official_url)

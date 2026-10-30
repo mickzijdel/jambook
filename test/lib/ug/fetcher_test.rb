@@ -42,6 +42,14 @@ class Ug::FetcherTest < ActiveSupport::TestCase
     assert_equal 1, bundle.size
   end
 
+  test "an unreadable page is recorded and the run carries on" do
+    stub_request(:get, TAB).to_return(body: %(<div class="js-store" data-content="{not json"></div>))
+    fetch(TAB, FREE)
+
+    assert_match(/unreadable/, bundle.first["error"])
+    assert_equal FREE, bundle.last["url"]
+  end
+
   test "a failed page is recorded and the run carries on" do
     stub_request(:get, TAB).to_return(status: 403)
     fetch(TAB)

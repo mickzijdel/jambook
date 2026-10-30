@@ -74,6 +74,7 @@ Jambook deploys with [Kamal](https://kamal-deploy.org) to one server, with SQLit
    KAMAL_REGISTRY_PASSWORD=<registry token> bin/kamal setup -d <name>
    ```
    Kamal reads `RAILS_MASTER_KEY` from `config/master.key` (see `.kamal/secrets-common`).
+   Behind Cloudflare's proxy, also set `forward_headers: true` (see the example file), or every visitor looks like Cloudflare to the password limits.
 3. Create your host login and set the guest password:
    ```sh
    bin/kamal app exec -d <name> -i "bin/rails jambook:host EMAIL=you@example.com"

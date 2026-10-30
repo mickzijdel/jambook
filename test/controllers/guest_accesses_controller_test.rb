@@ -61,4 +61,25 @@ class GuestAccessesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_guest_access_path
     assert_equal "Try again later.", flash[:alert]
   end
+
+  test "guests behind Cloudflare are counted one by one" do
+    10.times { guess "wrong", from: "198.51.100.7, 172.71.241.160", peer: "172.18.0.5" }
+    guess AccessHelpers::GUEST_PASSWORD, from: "198.51.100.8, 172.71.241.160", peer: "172.18.0.5"
+
+    assert_redirected_to root_path
+  end
+
+  test "a forged forwarded address doesn't dodge the limit" do
+    # Straight to the server, not through Cloudflare: kamal-proxy appends the sender's real address.
+    10.times { |n| guess "wrong", from: "198.51.100.#{n}, 203.0.113.9", peer: "172.18.0.5" }
+    guess AccessHelpers::GUEST_PASSWORD, from: "198.51.100.99, 203.0.113.9", peer: "172.18.0.5"
+
+    assert_equal "Try again later.", flash[:alert]
+  end
+
+  private
+    # peer is who connects to the app (kamal-proxy in production); from is the X-Forwarded-For chain.
+    def guess(password, from:, peer:)
+      post guest_access_path, params: { password: password }, headers: { "X-Forwarded-For" => from }, env: { "REMOTE_ADDR" => peer }
+    end
 end

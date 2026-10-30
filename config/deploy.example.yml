@@ -5,6 +5,9 @@ servers:
 
 proxy:
   host: jam.example.com
+  # Only behind Cloudflare's proxy (orange cloud): keep its X-Forwarded-For so rate limits
+  # see each visitor. See config/initializers/cloudflare.rb.
+  # forward_headers: true
 
 image: your-github-user/jambook
 registry:

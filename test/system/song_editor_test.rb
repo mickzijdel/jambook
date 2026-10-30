@@ -32,7 +32,7 @@ class SongEditorTest < ApplicationSystemTestCase
     using_session(:host) do
       sign_in_as_host
       visit root_path
-      click_on "Edit note"
+      click_on "Add note"
       fill_in "Notes", with: "Skip verse 2"
       click_on "Save note"
 

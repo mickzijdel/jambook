@@ -44,7 +44,15 @@ class TabBlocksTest < ApplicationSystemTestCase
     click_on "Save"
 
     assert_text "Tabbed"
-    assert_includes Song.find_by!(title: "Tabbed").sheet, "{start_of_tab}\ne|--3--|\nB|--0--|\n{end_of_tab}"
+    assert_includes Song.find_by!(title: "Tabbed").sheet, "{start_of_tab: Intro}\ne|--3--|\nB|--0--|\n{end_of_tab}"
+  end
+
+  test "a tab keeps its section heading" do
+    Room.instance.play(songs(:greensleeves))
+    enter_guest_password
+
+    assert_selector "#sheet-output .tab-block-wrap .label", text: "Solo"
+    assert_selector "#sheet-output .tab-block-wrap .label", text: "Intro"
   end
 
   test "every word in a lyric line sits on the same line" do

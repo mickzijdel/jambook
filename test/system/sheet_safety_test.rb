@@ -59,7 +59,7 @@ class SheetSafetyTest < ApplicationSystemTestCase
     Room.instance.play(songs(:amazing_grace))
     sign_in_as_host
     visit root_path
-    click_on "Edit note"
+    click_on "Add note"
     fill_in "Notes", with: "Half a note"
     refresh_and_wait
 

@@ -6,7 +6,8 @@ const UG_MARKUP = /\[\/?(ch|tab)\]/g
 const CHORD = /^[A-G][#b]?(?:m|maj|min|dim|aug|sus|add|M)?\d*(?:(?:add|sus|maj|b|#)\d+)*(?:\/[A-G][#b]?)?$/
 // A tab staff line: an optional string name, a bar, then mostly dashes and fret marks (e|--0--|, A||-3-|), maybe "x8" after.
 const STAFF = /^\s*(?:[A-Ga-g][#b]?\s*)?[|:](?=(?:[^-]*-){3})[-0-9hpbrsx~/\\|().*^<>=\s]*(?:\s+\(?[xX×]\s*\d+\)?)?\s*$/
-const TAB_START = /^\s*\{(?:start_of_tab|sot)(?::[^}]*)?\}\s*$/
+const TAB_START = /^\s*\{(?:start_of_tab|sot)(?::\s*([^}]*))?\}\s*$/
+const SECTION_LABEL = /^\s*\[([^\]]+)\]\s*$/
 const TAB_END = /^\s*\{(?:end_of_tab|eot)\}\s*$/
 const ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }
 
@@ -44,17 +45,27 @@ export function splitTabs(sheet) {
   const lines = sheet.replace(UG_MARKUP, "").split(/\r?\n/)
   const segments = []
   let text = []
+  // A section heading right above a tab ([Solo]) belongs to the tab, so it can't drift into another column.
+  const takeLabel = () => {
+    const last = text.findLastIndex((line) => line.trim())
+    const match = last === -1 ? null : text[last].match(SECTION_LABEL)
+    if (!match || CHORD.test(match[1])) return null
+    text = text.slice(0, last)
+    return match[1].trim()
+  }
   const flushText = () => {
     if (text.some((line) => line.trim())) segments.push({ type: "text", text: text.join("\n") })
     text = []
   }
 
   for (let i = 0; i < lines.length;) {
-    if (TAB_START.test(lines[i])) {
+    const start = lines[i].match(TAB_START)
+    if (start) {
       const end = lines.findIndex((line, j) => j > i && TAB_END.test(line))
       const stop = end === -1 ? lines.length : end
+      const label = start[1]?.trim() || takeLabel()
       flushText()
-      segments.push({ type: "tab", lines: lines.slice(i + 1, stop) })
+      segments.push({ type: "tab", lines: lines.slice(i + 1, stop), label })
       i = stop + 1
       continue
     }
@@ -62,8 +73,9 @@ export function splitTabs(sheet) {
     let j = i
     while (j < lines.length && STAFF.test(lines[j])) j++
     if (j - i >= 2) {
+      const label = takeLabel()
       flushText()
-      segments.push({ type: "tab", lines: lines.slice(i, j) })
+      segments.push({ type: "tab", lines: lines.slice(i, j), label })
       i = j
     } else {
       text.push(lines[i])
@@ -87,9 +99,10 @@ function textHtml(text, format, options) {
   return new HtmlDivFormatter().format(escaped(options ? transform(song, options) : song))
 }
 
-function tabHtml(lines, note) {
-  const label = note ? `<p class="tab-note">${escapeHtml(note)}</p>` : ""
-  return `<div class="tab-block-wrap">${label}<pre class="tab-block">${escapeHtml(lines.join("\n"))}</pre></div>`
+function tabHtml({ lines, label }, note) {
+  const heading = label ? `<h3 class="label">${escapeHtml(label)}</h3>` : ""
+  const asWritten = note ? `<p class="tab-note">${escapeHtml(note)}</p>` : ""
+  return `<div class="tab-block-wrap">${heading}${asWritten}<pre class="tab-block">${escapeHtml(lines.join("\n"))}</pre></div>`
 }
 
 // A sheet that can't be read is shown as plain text rather than not at all.
@@ -99,7 +112,7 @@ export function renderSheet({ sheet, format, writtenKey, writtenCapo = 0, key, c
     const shownKey = options ? transform(new ChordProParser().parse(`[${writtenKey}]`), options).key : null
     const note = shownKey && shownKey !== writtenKey ? `Tab as written: ${writtenKey}${writtenCapo ? `, capo ${writtenCapo}` : ""}` : null
     const html = splitTabs(sheet)
-      .map((segment) => (segment.type === "tab" ? tabHtml(segment.lines, note) : textHtml(segment.text, format, options)))
+      .map((segment) => (segment.type === "tab" ? tabHtml(segment, note) : textHtml(segment.text, format, options)))
       .join("")
     return { html, shownKey, transposed: Boolean(options) }
   } catch (error) {
@@ -113,7 +126,7 @@ export function toChordPro({ sheet, format }) {
   let key = null
   let capo = null
   const parts = splitTabs(sheet).map((segment) => {
-    if (segment.type === "tab") return `{start_of_tab}\n${segment.lines.join("\n")}\n{end_of_tab}`
+    if (segment.type === "tab") return `{start_of_tab${segment.label ? `: ${segment.label}` : ""}}\n${segment.lines.join("\n")}\n{end_of_tab}`
 
     const song = parse(segment.text, format)
     key ??= song.key

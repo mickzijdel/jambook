@@ -23,4 +23,12 @@ class RoomsControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "meta[name=turbo-refresh-method][content=morph]"
   end
+
+  test "the host is offered to add a note when there is none" do
+    Room.instance.play(songs(:rising_sun))
+    sign_in_as_host
+    get root_path
+
+    assert_select "a.edit-note", "Add note"
+  end
 end

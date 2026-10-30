@@ -12,8 +12,8 @@
 - All self-hosted from Fontsource (OFL, see app/assets/fonts/LICENSES.txt): no requests to Google.
 
 **Colour:** dark slate ground #1c2420, chalk ink #ece8dd, muted chalk #a3ada6, lamp amber #f2b347 (chords and the key only), lines #36423c. Light (follows the phone): pale slate #e6ebe7, ink #18221d, muted #4f5c55, amber #8f4f00. No cream: the light theme keeps the slate's cool cast.
-**Layout & composition:** single column, phone first. The room page's header (title + the big chalk key) stays pinned while the sheet scrolls. Chord rows have a fixed height so lyrics sit on one baseline. Tab blocks are monospace, never wrapped, shrunk to the screen width.
-**Motion & texture:** none, apart from a press state on buttons. Texture comes from one real image: a Gemini-drawn chalk sketch (guitar, stool, pint) on the password page and the empty room, blended onto the slate (screen) and inverted for light mode.
+**Layout & composition:** single column, phone first, and one column on wide screens too (Mick, 2026-10-30: side-by-side columns meant scrolling back up mid-song). The room page's header (title + the big chalk key) stays pinned while the sheet scrolls. Chord rows have a fixed height so lyrics sit on one baseline. Tab blocks are monospace and fit the screen width: a tab that would shrink below 14px breaks into even rows at its bar lines (or where every string rests), and only a part that still doesn't fit shrinks, down to 8px.
+**Motion & texture:** none, apart from a press state on buttons. Two real images: a Gemini-drawn chalk sketch (guitar, stool, open songbook; no pint) on the password page and the empty room, blended onto the slate (screen) and inverted for light mode; and a Gemini slate photo, grey and low-contrast, soft-light blended over the whole page and the pinned header (fixed, so the two line up). An SVG noise version of the slate was tried and read as fog.
 **Signature element:** the room key, chalked huge beside the title.
 
 **Not this:** cream paper, glow, gradients, cards inside cards, emoji, eyebrow labels, em dashes in copy.

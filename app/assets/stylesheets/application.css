@@ -19,6 +19,8 @@
   --edge: #7f8b84;
   --chalk-blend: screen;
   --chalk-filter: none;
+  /* The slate: a grey texture, soft-light blended onto --ground, so one image serves both themes. */
+  --slate: url("/slate.webp") center / cover fixed;
 
   --font-text: "Chivo", system-ui, sans-serif;
   --font-mono: "Chivo Mono", ui-monospace, monospace;
@@ -50,10 +52,11 @@
 
 * { box-sizing: border-box; }
 
-html { background: var(--ground); scrollbar-color: var(--line) var(--ground); }
+/* Fixed to the viewport, so the pinned song header's copy lines up with the board behind it. */
+html, .song-head { background: var(--slate), var(--ground); background-blend-mode: soft-light; }
+html { scrollbar-color: var(--line) var(--ground); }
 
 body {
-  background: var(--ground);
   caret-color: var(--ink);
   color: var(--ink);
   font: 400 17px/1.5 var(--font-text);
@@ -104,7 +107,6 @@ form.button_to { display: inline-flex; margin: 0; }
 /* The song view: one pinned header (title, the big chalk key, the capo), then the sheet. */
 .song-head {
   align-items: end;
-  background: var(--ground);
   border-bottom: 2px solid var(--line);
   display: grid;
   gap: var(--space-2) var(--space-3);

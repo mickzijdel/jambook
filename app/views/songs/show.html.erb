@@ -1,0 +1,8 @@
+<h1><%= @song.title %> – <%= @song.artist %></h1>
+<p id="notes"><%= @song.notes %></p>
+<p class="links">
+  <%= web_link_to "Listen", @song.listen_url %>
+  <%= web_link_to "Ultimate Guitar", @song.ug_url %>
+</p>
+<%= button_to "Play now", song_play_path(@song) if authenticated? %>
+<%= render "songs/sheet", song: @song, key: @song.house_key, label: "Key" %>

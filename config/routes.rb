@@ -7,7 +7,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :songs, only: [] do
+  resources :songs, only: %i[ index show ] do
     scope module: :songs do
       resource :play, only: :create
     end

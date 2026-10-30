@@ -62,3 +62,30 @@ button {
   color: var(--muted);
   font-style: italic;
 }
+
+.banner a {
+  color: var(--accent);
+}
+
+.songs {
+  list-style: none;
+  padding: 0;
+}
+
+.song {
+  align-items: center;
+  border-bottom: 1px solid #333;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.song .status, .song .tag, .song .badge {
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+a {
+  color: var(--fg);
+}

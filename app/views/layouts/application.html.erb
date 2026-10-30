@@ -28,8 +28,9 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body data-controller="resync" data-action="visibilitychange@document->resync#refresh">
     <%= turbo_stream_from Room.instance if guest_access? %>
+    <%= render "rooms/banner", page_song: @song unless controller_name == "rooms" %>
     <%= yield %>
   </body>
 </html>

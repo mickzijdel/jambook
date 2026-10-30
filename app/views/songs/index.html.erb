@@ -1,0 +1,26 @@
+<h1>Songs</h1>
+
+<%= form_with url: songs_path, method: :get, class: "song-filters" do |form| %>
+  <%= form.label :q, "Search" %>
+  <%= form.search_field :q, value: params[:q] %>
+  <%= form.label :status, "Status" %>
+  <%= form.select :status, Song.statuses.keys, { include_blank: "Any", selected: params[:status] } %>
+  <%= form.submit "Filter" %>
+<% end %>
+
+<ul class="songs">
+  <% @songs.each do |song| %>
+    <li class="song">
+      <%= link_to "#{song.title} – #{song.artist}", song %>
+      <span class="status"><%= song.status %></span>
+      <% song.tag_names.each do |name| %>
+        <%= link_to name, songs_path(tag: name), class: "tag" %>
+      <% end %>
+      <%= tag.strong("Now playing") if song.id == @playing_song_id %>
+      <% if authenticated? %>
+        <%= tag.span("needs paste", class: "badge") if song.needs_paste? %>
+        <%= button_to "Play now", song_play_path(song) %>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

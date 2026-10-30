@@ -1,3 +1,5 @@
+<div data-controller="wake-lock" data-action="visibilitychange@document->wake-lock#acquire"></div>
+
 <% if @song %>
   <h1><%= @song.title %> – <%= @song.artist %></h1>
   <p id="room-key">Room key <%= @room.room_key %></p>
@@ -6,5 +8,5 @@
   <%= render "songs/sheet", song: @song, key: @room.room_key, label: "Room key" %>
 <% else %>
   <h1>Nothing playing yet</h1>
-  <%= tag.p("Pick a song") if authenticated? %>
+  <%= link_to "Pick a song", songs_path if authenticated? %>
 <% end %>

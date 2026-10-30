@@ -2,4 +2,5 @@
 <nav class="host-controls" aria-label="Host controls">
   <%= button_to "key −", room_key_path(delta: -1), method: :patch %>
   <%= button_to "key +", room_key_path(delta: 1), method: :patch %>
+  <%= link_to "Pick next song", songs_path %>
 </nav>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title><%= content_for(:title) || "Jambook" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -31,7 +31,8 @@
 
   <body class="<%= content_for(:body_class) %>" data-controller="resync" data-action="visibilitychange@document->resync#refresh turbo:before-morph-element->resync#keepUnsavedInput">
     <%= turbo_stream_from Room.instance if guest_access? %>
+    <main><%= yield %></main>
+    <%# Pinned to the bottom of the screen, so it comes last when tabbing and reading too. %>
     <%= render "rooms/banner", page_song: @song if controller_name == "songs" && action_name.in?(%w[ index show ]) %>
-    <%= yield %>
   </body>
 </html>

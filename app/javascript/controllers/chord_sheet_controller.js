@@ -17,9 +17,20 @@ export default class extends Controller {
   }
 
   #memory = new Map()
+  // Firefox and Safari scroll a focused control to the nearest edge: keep it clear of the pinned header.
+  #header = new ResizeObserver(([ entry ]) => {
+    document.documentElement.style.scrollPaddingTop = `${entry.target.offsetHeight}px`
+  })
 
   connect() {
+    const head = this.element.querySelector(".song-head")
+    if (head) this.#header.observe(head)
     this.render()
+  }
+
+  disconnect() {
+    this.#header.disconnect()
+    document.documentElement.style.scrollPaddingTop = ""
   }
 
   sheetValueChanged() {

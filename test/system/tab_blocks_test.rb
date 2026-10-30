@@ -112,4 +112,23 @@ class TabBlocksTest < ApplicationSystemTestCase
 
     assert_not overflow, "a lyric runs past the right edge of the screen"
   end
+
+  # Seen in The Family Tree and Psycho Killer: these staffs were read as chord lines and ran off the screen.
+  test "a staff with long dashes or a note after its last bar is still a tab" do
+    Room.instance.play(Song.create!(title: "Odd staff", artist: "Traditional", written_key: "G", sheet_format: "ultimate_guitar",
+      sheet: "e|--5\u20143p5---|\nB|---3\u20133----|  let ring\nG|--0-------|"))
+    enter_guest_password
+
+    assert_selector "#sheet-output .tab-block", count: 1
+    assert_includes find("#sheet-output .tab-block").text, "let ring"
+  end
+
+  test "a chord chart written with bars isn't mistaken for a tab" do
+    Room.instance.play(Song.create!(title: "Bar chart", artist: "Traditional", written_key: "C", sheet_format: "ultimate_guitar",
+      sheet: "| C - - - | G - - - |\n| Am - - - | F - - - |"))
+    enter_guest_password
+
+    assert_text "Am - - -"
+    assert_no_selector "#sheet-output .tab-block"
+  end
 end

@@ -139,9 +139,9 @@ form.button_to { display: inline-flex; margin: 0; }
 .edit-note { color: var(--muted); font-size: 14px; }
 
 /* ChordSheetJS HtmlDivFormatter: chords sit above the lyrics they belong to. */
-.sheet-output { margin-top: var(--space-5); }
-.sheet-output .chord-sheet { column-gap: var(--space-7); }
-@media (min-width: 1100px) { .sheet-output .chord-sheet { column-width: 26rem; } }
+/* Columns go on the whole output: a sheet with tabs renders as several .chord-sheet parts. */
+.sheet-output { column-gap: var(--space-7); margin-top: var(--space-5); }
+@media (min-width: 1100px) { .sheet-output { column-width: 26rem; } }
 .sheet-output .paragraph { break-inside: avoid; margin-bottom: var(--space-5); }
 .sheet-output .row { align-items: flex-end; display: flex; flex-wrap: wrap; }
 .sheet-output .column { display: flex; flex-direction: column; }

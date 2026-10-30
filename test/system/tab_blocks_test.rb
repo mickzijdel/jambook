@@ -55,6 +55,21 @@ class TabBlocksTest < ApplicationSystemTestCase
     assert_selector "#sheet-output .tab-block-wrap .label", text: "Intro"
   end
 
+  test "on a wide screen the whole sheet flows into columns, tabs included" do
+    # Emulated, not resized: a resized window doesn't come back to the size later tests expect.
+    page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride", width: 1280, height: 900, deviceScaleFactor: 1, mobile: false)
+    Room.instance.play(songs(:greensleeves))
+    enter_guest_password
+
+    assert_selector "#sheet-output .tab-block", count: 2
+
+    lefts = evaluate_script("[...document.querySelectorAll('#sheet-output .tab-block-wrap')].map((el) => Math.round(el.getBoundingClientRect().left))")
+
+    assert_operator lefts.last, :>, lefts.first, "Intro and Solo tabs share one column: #{lefts.inspect}"
+  ensure
+    page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride")
+  end
+
   test "every word in a lyric line sits on the same line" do
     Room.instance.play(songs(:amazing_grace))
     enter_guest_password

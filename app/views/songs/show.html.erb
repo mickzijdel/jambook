@@ -1,11 +1,10 @@
-<h1><%= @song.title %> – <%= @song.artist %></h1>
-<%= render "songs/notes", song: @song %>
-<p class="links">
-  <%= web_link_to "Listen", @song.listen_url %>
-  <%= web_link_to "Ultimate Guitar", @song.ug_url %>
-</p>
-<% if authenticated? %>
-  <%= button_to "Play now", song_play_path(@song) %>
-  <%= link_to "Edit song", edit_song_path(@song) %>
+<% content_for :body_class, "song-page" %>
+<% actions = capture do %>
+  <% if authenticated? %>
+    <%= button_to "Play now", song_play_path(@song), class: "primary" %>
+    <%= link_to "Edit song", edit_song_path(@song), class: "button ghost" %>
+  <% end %>
+  <%= web_link_to "Listen", @song.listen_url, class: "button ghost" %>
+  <%= web_link_to "Ultimate Guitar", @song.ug_url, class: "button ghost" %>
 <% end %>
-<%= render "songs/sheet", song: @song, key: @song.house_key, label: "Key" %>
+<%= render "songs/sheet", song: @song, key: @song.house_key, key_label: "Key", actions: actions %>

@@ -1,110 +1,220 @@
-/* Phone-first, dark by default: jams happen in the evening. */
+/* design-process · A pub chalkboard · type: Fredericka the Great + Caveat Brush + Chivo/Chivo Mono · palette: slate/chalk/amber · brief: docs/design/brief.md */
+
+@font-face { font-family: "Chivo"; src: url("/chivo-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Chivo"; src: url("/chivo-latin-ext.woff2") format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Chivo Mono"; src: url("/chivo-mono-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Chivo Mono"; src: url("/chivo-mono-latin-ext.woff2") format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Fredericka the Great"; src: url("/fredericka-the-great-latin.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Caveat Brush"; src: url("/caveat-brush-latin.woff2") format("woff2"); font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Caveat Brush"; src: url("/caveat-brush-latin-ext.woff2") format("woff2"); font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
 :root {
   color-scheme: dark;
-  --bg: #111;
-  --fg: #eee;
-  --muted: #9a9a9a;
-  --accent: #f5c542;
+  --ground: #1c2420;
+  --raised: #252f2a;
+  --ink: #ece8dd;
+  --muted: #a3ada6;
+  --accent: #f2b347;
+  --line: #36423c;
+  --edge: #7f8b84;
+  --chalk-blend: screen;
+  --chalk-filter: none;
+  /* The slate: a grey texture, soft-light blended onto --ground, so one image serves both themes. */
+  --slate: url("/slate.webp") center / cover fixed;
+
+  --font-text: "Chivo", system-ui, sans-serif;
+  --font-mono: "Chivo Mono", ui-monospace, monospace;
+  --font-chalk: "Fredericka the Great", "Chivo", serif;
+  --font-hand: "Caveat Brush", "Chivo", cursive;
+
+  --lyric-size: 20px;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --radius: 6px;
 }
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --ground: #e6ebe7;
+    --raised: #d3dbd5;
+    --ink: #18221d;
+    --muted: #4f5c55;
+    --accent: #8f4f00;
+    --line: #bfc9c2;
+    --edge: #6a776f;
+    --chalk-blend: multiply;
+    --chalk-filter: invert(1);
+  }
+}
+
+@media (min-width: 700px) { :root { --lyric-size: 24px; } }
+@media (min-width: 1100px) { :root { --lyric-size: 26px; } }
+
+* { box-sizing: border-box; }
+
+/* Fixed to the viewport, so the pinned song header's copy lines up with the board behind it. */
+html, .song-head { background: var(--slate), var(--ground); background-blend-mode: soft-light; }
+html { scrollbar-color: var(--line) var(--ground); }
 
 body {
-  background: var(--bg);
-  color: var(--fg);
-  font: 18px/1.5 system-ui, sans-serif;
+  caret-color: var(--ink);
+  color: var(--ink);
+  font: 400 17px/1.5 var(--font-text);
   margin: 0 auto;
-  max-width: 48rem;
-  padding: 1rem;
+  max-width: 44rem;
+  padding: 0 var(--space-4) 96px;
 }
+body.song-page { max-width: 64rem; }
 
-button {
-  font: inherit;
-  min-height: 2.75rem;
-  min-width: 2.75rem;
-}
+::selection { background: var(--ink); color: var(--ground); }
 
-.host-controls, .capo {
-  display: flex;
-  gap: 0.5rem;
-}
+a { color: var(--ink); text-underline-offset: 3px; }
 
-.sheet-status {
-  color: var(--muted);
-}
+/* Amber is for chords and the key only; focus and actions use chalk white. */
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 
-/* ChordSheetJS HtmlDivFormatter: chords sit above the lyrics they belong to. */
-.sheet-output .paragraph {
-  margin-bottom: 1rem;
-}
+h1, h2 { font-family: var(--font-chalk); font-weight: 400; line-height: 1.05; margin: 0; }
+h1 { font-size: 34px; }
+h2 { font-size: 26px; margin-top: var(--space-6); }
 
-.sheet-output .row {
-  display: flex;
-  flex-wrap: wrap;
-}
+p { margin: 0 0 var(--space-3); }
 
-.sheet-output .column {
-  display: flex;
-  flex-direction: column;
-}
+.muted { color: var(--muted); }
 
-.sheet-output .chord {
-  color: var(--accent);
-  font-weight: 700;
-  min-height: 1.5em;
-  padding-right: 0.3em;
-  white-space: pre;
-}
-
-.sheet-output .lyrics {
-  white-space: pre;
-}
-
-.sheet-output .label, .sheet-output .comment {
-  color: var(--muted);
-  font-style: italic;
-}
-
-.banner a {
-  color: var(--accent);
-}
-
-.songs {
-  list-style: none;
-  padding: 0;
-}
-
-.song {
+button, .button, input[type="submit"] {
   align-items: center;
-  border-bottom: 1px solid #333;
+  background: var(--raised);
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  font: 600 16px/1 var(--font-text);
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  text-decoration: none;
+}
+button:active, .button:active, input[type="submit"]:active { transform: scale(0.97); }
+.button.ghost, button.ghost { background: transparent; box-shadow: inset 0 0 0 2px var(--edge); }
+.button.primary, button.primary, input[type="submit"].primary { background: var(--ink); color: var(--ground); }
+.wide, input[type="submit"].wide { width: 100%; }
+button.small { font-size: 14px; min-height: 36px; padding: 0 var(--space-3); }
+form.button_to { display: inline-flex; margin: 0; }
+
+.row-of-buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+/* The song view: one pinned header (title, the big chalk key, the capo), then the sheet. */
+.song-head {
+  align-items: end;
+  border-bottom: 2px solid var(--line);
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
+  gap: var(--space-2);
+  padding: var(--space-3) 0 var(--space-2);
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
+/* The key sits beside the title while the title's longest word fits next to it, and drops below on narrow phones. */
+.song-id { flex: 1 1 0; min-width: min-content; }
+.song-head h1 { font-size: 30px; }
+.song-head .artist { color: var(--muted); margin: var(--space-1) 0 0; }
 
-.song .status, .song .tag, .song .badge {
-  color: var(--muted);
-  font-size: 0.85em;
-}
+.keybox { margin-left: auto; text-align: center; }
+.keybox .key-label { color: var(--muted); display: block; font-size: 13px; }
+.keybox .key { color: var(--accent); font: 400 52px/0.95 var(--font-chalk); min-width: 1.4em; }
 
-a {
-  color: var(--fg);
-}
+.stepper, .capo-strip { align-items: center; display: flex; gap: var(--space-2); }
+.step-form { display: inline-flex; }
+.step { background: transparent; border-radius: 999px; box-shadow: inset 0 0 0 2px var(--edge); font-size: 22px; font-weight: 400; min-width: 40px; min-height: 40px; padding: 0; }
 
-form label {
-  display: block;
-  margin-top: 0.75rem;
-}
+.capo-strip { flex-basis: 100%; flex-wrap: wrap; }
+.capo-label { color: var(--muted); font-size: 14px; }
+.capo-value { font: 700 20px var(--font-mono); min-width: 1.2em; text-align: center; }
+.sheet-status { color: var(--muted); font-size: 15px; margin-left: var(--space-2); }
 
-form input, form select, form textarea {
-  box-sizing: border-box;
-  font: inherit;
+.song-actions { margin: var(--space-4) 0 0; }
+
+/* The host's note, chalked on the board. */
+.notes-frame { display: block; margin: var(--space-4) 0 0; }
+#notes { font: 400 24px/1.25 var(--font-hand); margin: 0 0 var(--space-1); white-space: pre-line; }
+#notes:empty { display: none; }
+/* The padding makes a 24px tap target (WCAG 2.2), as for the tag links in the song list. */
+.edit-note { color: var(--muted); display: inline-block; font-size: 14px; padding-block: 4px; }
+
+/* ChordSheetJS HtmlDivFormatter: chords sit above the lyrics they belong to. One column on every
+   screen (Mick's call): side-by-side columns meant scrolling back up mid-song. */
+.sheet-output { margin-top: var(--space-5); }
+.sheet-output .paragraph { margin-bottom: var(--space-5); }
+.sheet-output .row { align-items: flex-end; display: flex; flex-wrap: wrap; }
+.sheet-output .column { display: flex; flex-direction: column; }
+/* One fixed height for every chord cell, with or without a chord, so lyrics share a baseline. */
+.sheet-output .chord { color: var(--accent); font: 700 var(--lyric-size)/1.3 var(--font-mono); height: 1.3em; padding-right: 0.3em; white-space: pre; }
+.sheet-output .lyrics { font-size: var(--lyric-size); line-height: 1.45; white-space: pre; }
+.sheet-output .label { border-bottom: 2px solid var(--muted); display: inline-block; font: 400 26px/1.1 var(--font-hand); margin: 0 0 var(--space-2); }
+.sheet-output .comment { color: var(--muted); font-style: italic; }
+.sheet-output .sheet-plain { font: 400 16px/1.5 var(--font-mono); white-space: pre-wrap; }
+
+/* Tab staffs: monospace, fitted to the screen by chord_sheet_controller#fitTabs (broken at bar lines, then shrunk). */
+.sheet-output .tab-block { font: 400 16px/1.25 var(--font-mono); margin: 0 0 var(--space-5); overflow-x: auto; white-space: pre; }
+.sheet-output .tab-note { color: var(--muted); font-size: 14px; margin: 0 0 var(--space-1); }
+
+/* The chalk sketch: white chalk on black, blended onto the slate; inverted for the light theme. */
+.chalk-sketch { display: block; filter: var(--chalk-filter); height: auto; margin: var(--space-5) auto var(--space-4); mix-blend-mode: var(--chalk-blend); max-width: 100%; }
+
+.empty-room, .door { margin: 0 auto; max-width: 22rem; padding-top: var(--space-6); text-align: center; }
+.empty-room .chalk-sketch { width: 220px; }
+.door .chalk-sketch { width: 240px; }
+.door h1 { font-size: 48px; margin-bottom: var(--space-3); }
+.door form { margin: var(--space-5) 0 0; text-align: left; }
+
+/* Song list: tonight's board. */
+.list-head { align-items: baseline; display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-5); justify-content: space-between; padding: var(--space-5) 0 var(--space-2); }
+.host-nav { display: flex; gap: var(--space-4); }
+.host-nav a { color: var(--muted); }
+.song-filters { display: grid; gap: var(--space-3); grid-template-columns: 1fr 8rem; margin: var(--space-3) 0 var(--space-4); }
+.song-filters label { color: var(--muted); font-size: 13px; margin: 0 0 var(--space-1); }
+.active-tag { margin: 0 0 var(--space-3); }
+.songs { list-style: none; margin: 0; padding: 0; }
+.song { align-items: center; border-bottom: 1px solid var(--line); column-gap: var(--space-3); display: grid; grid-template-columns: 1fr auto auto; padding: var(--space-3) 0; }
+.song-link { font-weight: 600; min-width: 0; text-decoration: none; }
+.song-link .by { color: var(--muted); font-weight: 400; }
+.song-key { color: var(--accent); font: 700 17px/1 var(--font-mono); grid-column: 2; grid-row: 1 / span 2; }
+.song .meta { color: var(--muted); display: flex; flex-wrap: wrap; font-size: 14px; gap: var(--space-1) var(--space-3); grid-column: 1; }
+.song .meta a { color: var(--muted); padding-block: 2px; } /* 24px tap target */
+.song .playing { color: var(--ink); font-weight: 700; }
+.song.is-playing .song-link .title { text-decoration: underline 3px; text-underline-offset: 5px; }
+.row-play { grid-column: 3; grid-row: 1 / span 2; }
+
+/* Now playing: pinned to the bottom of the song pages. */
+.banner { bottom: 0; left: 0; margin: 0; padding: var(--space-3) var(--space-4) var(--space-4); pointer-events: none; position: fixed; right: 0; z-index: 2; }
+.banner a { align-items: center; background: var(--ink); border-radius: var(--radius); color: var(--ground); display: flex; gap: var(--space-3); margin: 0 auto; max-width: calc(44rem - 2 * var(--space-4)); padding: var(--space-3) var(--space-4); pointer-events: auto; text-decoration: none; }
+.banner .join { font-weight: 700; margin-left: auto; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Forms. */
+form label { color: var(--muted); display: block; font-size: 14px; font-weight: 600; margin: var(--space-4) 0 var(--space-1); }
+input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="url"], input[type="number"], input[type="file"], select, textarea {
+  background: var(--raised);
+  border: 2px solid var(--edge);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font: 400 17px/1.4 var(--font-text);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
   width: 100%;
 }
+input:focus-visible, select:focus-visible, textarea:focus-visible { border-color: var(--ink); outline: none; }
+textarea { font-family: var(--font-mono); font-size: 15px; }
+form input[type="submit"] { margin-top: var(--space-5); }
+.alert, .errors { color: var(--ink); font-weight: 700; }
+.errors { padding-left: var(--space-4); }
+.notice { color: var(--muted); }
+.page-head { padding: var(--space-5) 0 0; }
 
-form textarea {
-  font-family: ui-monospace, monospace;
-}
+.install-hint { background: var(--raised); border-radius: var(--radius); margin: var(--space-4) 0 0; padding: var(--space-3) var(--space-4); }
+.install-hint button { margin-left: var(--space-2); }
 
-.alert, .errors {
-  color: var(--accent);
+@media (prefers-reduced-motion: reduce) {
+  button:active, .button:active, input[type="submit"]:active { transform: none; }
 }

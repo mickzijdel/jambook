@@ -40,3 +40,15 @@ auld_lang_syne:
   written_key: C
   written_capo: 0
   house_key: C
+
+# A tab staff (narrow) and one wider than a phone: tab blocks are shown as written, never transposed.
+greensleeves:
+  title: Greensleeves
+  artist: Traditional
+  title_key: greensleeves
+  status: maybe
+  sheet_format: ultimate_guitar
+  sheet: "[Intro]\ne|-----0-----|-----0-----|\nB|---1---1---|---1---1---|\nG|-2-------2-|-0-------0-|\nD|-----------|-----------|\nA|0----------|3----------|\nE|-----------|-----------| x2\n\n[Verse]\nAm       C\nAlas my love you do me wrong\n\n[Solo]\ne|------------------------------3------------------------------|\nB|------------------------------3------------------------------|\nG|------------------------------3------------------------------|\nD|------------------------------3------------------------------|\nA|------------------------------3------------------------------|\nE|------------------------------3------------------------------|"
+  written_key: Am
+  written_capo: 0
+  house_key: Am

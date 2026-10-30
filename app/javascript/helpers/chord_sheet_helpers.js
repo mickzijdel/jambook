@@ -4,6 +4,11 @@ import { ChordLyricsPair, ChordProFormatter, ChordProParser, HtmlDivFormatter, T
 const UG_MARKUP = /\[\/?(ch|tab)\]/g
 // A chord symbol (G, F#m7b5, A7sus4, C/G). Section labels such as [Chorus] or [Verse 1] don't match.
 const CHORD = /^[A-G][#b]?(?:m|maj|min|dim|aug|sus|add|M)?\d*(?:(?:add|sus|maj|b|#)\d+)*(?:\/[A-G][#b]?)?$/
+// A tab staff line: an optional string name, a bar, then mostly dashes and fret marks (e|--0--|, A||-3-|), maybe "x8" after.
+const STAFF = /^\s*(?:[A-Ga-g][#b]?\s*)?[|:](?=(?:[^-]*-){3})[-0-9hpbrsx~/\\|().*^<>=\s]*(?:\s+\(?[xX×]\s*\d+\)?)?\s*$/
+const TAB_START = /^\s*\{(?:start_of_tab|sot)(?::\s*([^}]*))?\}\s*$/
+const SECTION_LABEL = /^\s*\[([^\]]+)\]\s*$/
+const TAB_END = /^\s*\{(?:end_of_tab|eot)\}\s*$/
 const ESCAPES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }
 
 const escapeHtml = (text) => (typeof text === "string" ? text.replace(/[&<>"']/g, (character) => ESCAPES[character]) : text)
@@ -34,26 +39,99 @@ function escaped(song) {
   })
 }
 
+// Splits a sheet into text and tab parts: ChordPro {start_of_tab}..{end_of_tab} sections, and runs of
+// two or more tab staff lines. Tabs are fret numbers, so they're shown as written, never transposed.
+export function splitTabs(sheet) {
+  const lines = sheet.replace(UG_MARKUP, "").split(/\r?\n/)
+  const segments = []
+  let text = []
+  // A section heading right above a tab ([Solo]) belongs to the tab, so it can't drift into another column.
+  const takeLabel = () => {
+    const last = text.findLastIndex((line) => line.trim())
+    const match = last === -1 ? null : text[last].match(SECTION_LABEL)
+    if (!match || CHORD.test(match[1])) return null
+    text = text.slice(0, last)
+    return match[1].trim()
+  }
+  const flushText = () => {
+    if (text.some((line) => line.trim())) segments.push({ type: "text", text: text.join("\n") })
+    text = []
+  }
+
+  for (let i = 0; i < lines.length;) {
+    const start = lines[i].match(TAB_START)
+    if (start) {
+      const end = lines.findIndex((line, j) => j > i && TAB_END.test(line))
+      const stop = end === -1 ? lines.length : end
+      const label = start[1]?.trim() || takeLabel()
+      flushText()
+      segments.push({ type: "tab", lines: lines.slice(i + 1, stop), label })
+      i = stop + 1
+      continue
+    }
+
+    let j = i
+    while (j < lines.length && STAFF.test(lines[j])) j++
+    if (j - i >= 2) {
+      const label = takeLabel()
+      flushText()
+      segments.push({ type: "tab", lines: lines.slice(i, j), label })
+      i = j
+    } else {
+      text.push(lines[i])
+      i++
+    }
+  }
+  flushText()
+  return segments
+}
+
 // The sheet as written, moved to the sounding key, then to the room key, then down by the viewer's capo.
+function transform(song, { writtenKey, writtenCapo, key, capo }) {
+  let shown = song.setKey(writtenKey).setCapo(writtenCapo).decapo()
+  if (key) shown = shown.changeKey(key)
+  if (capo > 0) shown = shown.transpose(-capo)
+  return shown.setCapo(null)
+}
+
+function textHtml(text, format, options) {
+  const song = parse(text, format)
+  return new HtmlDivFormatter().format(escaped(options ? transform(song, options) : song))
+}
+
+function tabHtml({ lines, label }, note) {
+  const heading = label ? `<h3 class="label">${escapeHtml(label)}</h3>` : ""
+  const asWritten = note ? `<p class="tab-note">${escapeHtml(note)}</p>` : ""
+  return `<div class="tab-block-wrap">${heading}${asWritten}<pre class="tab-block">${escapeHtml(lines.join("\n"))}</pre></div>`
+}
+
 // A sheet that can't be read is shown as plain text rather than not at all.
 export function renderSheet({ sheet, format, writtenKey, writtenCapo = 0, key, capo = 0 }) {
   try {
-    const song = parse(sheet, format)
-    if (!writtenKey) {
-      return { html: new HtmlDivFormatter().format(escaped(song)), shownKey: null, transposed: false }
-    }
-
-    let shown = song.setKey(writtenKey).setCapo(writtenCapo).decapo()
-    if (key) shown = shown.changeKey(key)
-    if (capo > 0) shown = shown.transpose(-capo)
-    return { html: new HtmlDivFormatter().format(escaped(shown.setCapo(null))), shownKey: shown.key, transposed: true }
+    const options = writtenKey ? { writtenKey, writtenCapo, key, capo } : null
+    const shownKey = options ? transform(new ChordProParser().parse(`[${writtenKey}]`), options).key : null
+    const note = shownKey && shownKey !== writtenKey ? `Tab as written: ${writtenKey}${writtenCapo ? `, capo ${writtenCapo}` : ""}` : null
+    const html = splitTabs(sheet)
+      .map((segment) => (segment.type === "tab" ? tabHtml(segment, note) : textHtml(segment.text, format, options)))
+      .join("")
+    return { html, shownKey, transposed: Boolean(options) }
   } catch (error) {
     console.warn("Showing the sheet as plain text, it couldn't be read:", error.message)
     return { html: `<pre class="sheet-plain">${escapeHtml(sheet)}</pre>`, shownKey: null, transposed: false }
   }
 }
 
+// Tab parts become ChordPro tab sections, so they survive the conversion untouched.
 export function toChordPro({ sheet, format }) {
-  const song = parse(sheet, format)
-  return { chordpro: new ChordProFormatter().format(song), key: song.key, capo: song.capo ? Number(song.capo) : null }
+  let key = null
+  let capo = null
+  const parts = splitTabs(sheet).map((segment) => {
+    if (segment.type === "tab") return `{start_of_tab${segment.label ? `: ${segment.label}` : ""}}\n${segment.lines.join("\n")}\n{end_of_tab}`
+
+    const song = parse(segment.text, format)
+    key ??= song.key
+    capo ??= song.capo ? Number(song.capo) : null
+    return new ChordProFormatter().format(song).trim()
+  })
+  return { chordpro: parts.join("\n\n"), key, capo }
 }

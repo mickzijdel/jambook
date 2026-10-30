@@ -1,4 +1,4 @@
-<h1>Settings</h1>
+<header class="page-head"><h1>Settings</h1></header>
 
 <%= tag.p(notice, class: "notice") if notice %>
 
@@ -16,5 +16,5 @@
   <%= form.password_field :guest_password, required: true, autocomplete: "new-password" %>
   <%= form.label :guest_password_confirmation, "Type it again" %>
   <%= form.password_field :guest_password_confirmation, required: true, autocomplete: "new-password" %>
-  <%= form.submit "Save" %>
+  <%= form.submit "Save", class: "primary" %>
 <% end %>

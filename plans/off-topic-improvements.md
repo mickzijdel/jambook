@@ -19,3 +19,7 @@ Noticed while building; not part of the plan.
 - `ug:fetch` still stops on network errors (timeouts, DNS); a re-run resumes, but it could record them like page errors.
 - Missing regression tests: cable with a stale guest cookie or a host session; guests calling key, notes, bundle import or delete.
 - The login page's inline `style=` will break once the CSP is enforced.
+
+## Seen during the design pass (2026-10-30)
+
+- **Browser tests flake with 6 parallel workers on the laptop** (and on the commit before the design fixes too): 1 to 4 failures in about half of the runs, always a click that never lands (sign in, guest password, Save) or a live update that never arrives. The test log shows no slow requests, a serial run (`PARALLEL_WORKERS=1 bin/rails test:system`) passes, and CI passes. Suspect `resync_controller` calling `Turbo.session.refresh` (cable reconnect or `visibilitychange`) while a form submit is in flight, or Capybara's 2 s wait. If it's the refresh, a real host could lose a form submit too.

@@ -2,6 +2,6 @@
   <%= form_with model: @song, url: song_notes_path(@song), method: :patch do |form| %>
     <%= form.label :notes, "Notes" %>
     <%= form.text_area :notes, rows: 3 %>
-    <%= form.submit "Save note" %>
+    <%= form.submit "Save note", class: "primary" %>
   <% end %>
 <% end %>

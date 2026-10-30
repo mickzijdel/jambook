@@ -13,7 +13,7 @@ class RoomsControllerTest < ActionDispatch::IntegrationTest
     enter_guest_password
     get root_path
 
-    assert_select "h1", "Amazing Grace – John Newton"
+    assert_select "h1", "Amazing Grace"
     assert_select "#sheet[data-chord-sheet-key-value=?]", "A"
   end
 
@@ -22,5 +22,13 @@ class RoomsControllerTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_select "meta[name=turbo-refresh-method][content=morph]"
+  end
+
+  test "the host is offered to add a note when there is none" do
+    Room.instance.play(songs(:rising_sun))
+    sign_in_as_host
+    get root_path
+
+    assert_select "a.edit-note", "Add note"
   end
 end

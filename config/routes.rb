@@ -7,9 +7,10 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :songs, only: %i[ index show ] do
+  resources :songs do
     scope module: :songs do
       resource :play, only: :create
+      resource :notes, only: %i[ edit update ]
     end
   end
 

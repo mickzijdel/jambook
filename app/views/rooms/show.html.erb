@@ -3,7 +3,7 @@
 <% if @song %>
   <h1><%= @song.title %> – <%= @song.artist %></h1>
   <p id="room-key">Room key <%= @room.room_key %></p>
-  <p id="notes"><%= @song.notes %></p>
+  <%= render "songs/notes", song: @song %>
   <%= render "rooms/host_controls", room: @room if authenticated? %>
   <%= render "songs/sheet", song: @song, key: @room.room_key, label: "Room key" %>
 <% else %>

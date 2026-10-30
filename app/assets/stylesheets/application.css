@@ -89,3 +89,22 @@ button {
 a {
   color: var(--fg);
 }
+
+form label {
+  display: block;
+  margin-top: 0.75rem;
+}
+
+form input, form select, form textarea {
+  box-sizing: border-box;
+  font: inherit;
+  width: 100%;
+}
+
+form textarea {
+  font-family: ui-monospace, monospace;
+}
+
+.alert, .errors {
+  color: var(--accent);
+}

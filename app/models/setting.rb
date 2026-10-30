@@ -2,6 +2,8 @@
 class Setting < ApplicationRecord
   has_secure_password :guest_password, validations: false
 
+  validates :guest_password, presence: true, confirmation: true, on: :update
+
   before_update :lock_out_old_guests, if: :guest_password_digest_changed?
 
   def self.instance

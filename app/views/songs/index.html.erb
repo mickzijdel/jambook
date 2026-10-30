@@ -1,5 +1,7 @@
 <h1>Songs</h1>
-<%= link_to "Add a song", new_song_path if authenticated? %>
+<% if authenticated? %>
+  <nav class="host-nav"><%= link_to "Add a song", new_song_path %> <%= link_to "Settings", edit_settings_path %></nav>
+<% end %>
 
 <%= form_with url: songs_path, method: :get, class: "song-filters" do |form| %>
   <%= form.label :q, "Search" %>

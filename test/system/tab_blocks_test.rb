@@ -58,7 +58,8 @@ class TabBlocksTest < ApplicationSystemTestCase
     assert_selector "#sheet-output .tab-block-wrap .label", text: "Intro"
   end
 
-  test "on a wide screen the whole sheet flows into columns, tabs included" do
+  # Mick's call: two columns meant scrolling back up mid-song, so a song reads straight down on any screen.
+  test "on a wide screen the song still reads straight down in one column" do
     # Emulated, not resized: a resized window doesn't come back to the size later tests expect.
     page.driver.browser.execute_cdp("Emulation.setDeviceMetricsOverride", width: 1280, height: 900, deviceScaleFactor: 1, mobile: false)
     Room.instance.play(songs(:greensleeves))
@@ -66,9 +67,10 @@ class TabBlocksTest < ApplicationSystemTestCase
 
     assert_selector "#sheet-output .tab-block", count: 2
 
-    lefts = evaluate_script("[...document.querySelectorAll('#sheet-output .tab-block-wrap')].map((el) => Math.round(el.getBoundingClientRect().left))")
+    parts = evaluate_script("[...document.querySelectorAll('#sheet-output > *')].map((el) => { const box = el.getBoundingClientRect(); return [ Math.round(box.left), Math.round(box.top) ] })")
 
-    assert_operator lefts.last, :>, lefts.first, "Intro and Solo tabs share one column: #{lefts.inspect}"
+    assert_equal 1, parts.map(&:first).uniq.size, "parts start at different lefts: #{parts.inspect}"
+    assert_equal parts.map(&:last).sort, parts.map(&:last), "parts aren't in reading order: #{parts.inspect}"
   ensure
     page.driver.browser.execute_cdp("Emulation.clearDeviceMetricsOverride")
   end

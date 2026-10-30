@@ -138,11 +138,10 @@ form.button_to { display: inline-flex; margin: 0; }
 #notes:empty { display: none; }
 .edit-note { color: var(--muted); font-size: 14px; }
 
-/* ChordSheetJS HtmlDivFormatter: chords sit above the lyrics they belong to. */
-/* Columns go on the whole output: a sheet with tabs renders as several .chord-sheet parts. */
-.sheet-output { column-gap: var(--space-7); margin-top: var(--space-5); }
-@media (min-width: 1100px) { .sheet-output { column-width: 26rem; } }
-.sheet-output .paragraph { break-inside: avoid; margin-bottom: var(--space-5); }
+/* ChordSheetJS HtmlDivFormatter: chords sit above the lyrics they belong to. One column on every
+   screen (Mick's call): side-by-side columns meant scrolling back up mid-song. */
+.sheet-output { margin-top: var(--space-5); }
+.sheet-output .paragraph { margin-bottom: var(--space-5); }
 .sheet-output .row { align-items: flex-end; display: flex; flex-wrap: wrap; }
 .sheet-output .column { display: flex; flex-direction: column; }
 /* One fixed height for every chord cell, with or without a chord, so lyrics share a baseline. */
@@ -152,8 +151,7 @@ form.button_to { display: inline-flex; margin: 0; }
 .sheet-output .comment { color: var(--muted); font-style: italic; }
 .sheet-output .sheet-plain { font: 400 16px/1.5 var(--font-mono); white-space: pre-wrap; }
 
-/* Tab staffs: monospace, never wrapped, shrunk to the screen width by chord_sheet_controller#fitTabs (Mick's call over a size floor). */
-.sheet-output .tab-block-wrap { break-inside: avoid; }
+/* Tab staffs: monospace, fitted to the screen by chord_sheet_controller#fitTabs (broken at bar lines, then shrunk). */
 .sheet-output .tab-block { font: 400 16px/1.25 var(--font-mono); margin: 0 0 var(--space-5); overflow-x: auto; white-space: pre; }
 .sheet-output .tab-note { color: var(--muted); font-size: 14px; margin: 0 0 var(--space-1); }
 

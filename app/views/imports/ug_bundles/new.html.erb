@@ -1,0 +1,11 @@
+<h1>Import Ultimate Guitar tabs</h1>
+
+<%= tag.p(flash[:alert], class: "alert") if flash[:alert] %>
+
+<p>Upload the bundle that <code>bin/rails "ug:fetch[urls.txt,bundle.json]"</code> wrote on your computer. See the README.</p>
+
+<%= form_with url: imports_ug_bundle_path, multipart: true do |form| %>
+  <%= form.label :file, "Bundle file" %>
+  <%= form.file_field :file, accept: ".json,application/json", required: true %>
+  <%= form.submit "Import" %>
+<% end %>

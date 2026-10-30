@@ -1,0 +1,9 @@
+<h1>Jambook</h1>
+
+<%= tag.p(flash[:alert], class: "alert") if flash[:alert] %>
+
+<%= form_with url: guest_access_path do |form| %>
+  <%= form.label :password, "Password" %>
+  <%= form.password_field :password, required: true, autofocus: true, autocomplete: "current-password" %>
+  <%= form.submit "Let me in" %>
+<% end %>

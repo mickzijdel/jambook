@@ -1,10 +1,110 @@
-/*
- * This is a manifest file that'll be compiled into application.css.
- *
- * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
- * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
- * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
- * depending on specificity.
- *
- * Consider organizing styles into separate files for maintainability.
- */
+/* Phone-first, dark by default: jams happen in the evening. */
+:root {
+  color-scheme: dark;
+  --bg: #111;
+  --fg: #eee;
+  --muted: #9a9a9a;
+  --accent: #f5c542;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 18px/1.5 system-ui, sans-serif;
+  margin: 0 auto;
+  max-width: 48rem;
+  padding: 1rem;
+}
+
+button {
+  font: inherit;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+}
+
+.host-controls, .capo {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sheet-status {
+  color: var(--muted);
+}
+
+/* ChordSheetJS HtmlDivFormatter: chords sit above the lyrics they belong to. */
+.sheet-output .paragraph {
+  margin-bottom: 1rem;
+}
+
+.sheet-output .row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.sheet-output .column {
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet-output .chord {
+  color: var(--accent);
+  font-weight: 700;
+  min-height: 1.5em;
+  padding-right: 0.3em;
+  white-space: pre;
+}
+
+.sheet-output .lyrics {
+  white-space: pre;
+}
+
+.sheet-output .label, .sheet-output .comment {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.banner a {
+  color: var(--accent);
+}
+
+.songs {
+  list-style: none;
+  padding: 0;
+}
+
+.song {
+  align-items: center;
+  border-bottom: 1px solid #333;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.song .status, .song .tag, .song .badge {
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+a {
+  color: var(--fg);
+}
+
+form label {
+  display: block;
+  margin-top: 0.75rem;
+}
+
+form input, form select, form textarea {
+  box-sizing: border-box;
+  font: inherit;
+  width: 100%;
+}
+
+form textarea {
+  font-family: ui-monospace, monospace;
+}
+
+.alert, .errors {
+  color: var(--accent);
+}

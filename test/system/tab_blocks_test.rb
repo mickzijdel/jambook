@@ -85,4 +85,17 @@ class TabBlocksTest < ApplicationSystemTestCase
 
     assert_equal 1, tops.uniq.size, "lyric tops differ: #{tops.inspect}"
   end
+
+  # Seen in What's Up: a chord after the last word dropped down beside the lyrics ("OohG").
+  test "a chord after the last word stays on the chord line" do
+    Room.instance.play(Song.create!(title: "End chord", artist: "Traditional", written_key: "G", sheet_format: "ultimate_guitar",
+      sheet: "[Interlude]\nG       Am   C             G\nOoh, Ooh Ooh"))
+    enter_guest_password
+
+    assert_selector "#sheet-output .chord", text: "Am"
+
+    tops = evaluate_script("[...document.querySelectorAll('#sheet-output .chord')].filter((el) => el.textContent.trim()).map((el) => Math.round(el.getBoundingClientRect().top))")
+
+    assert_equal [ 1, 4 ], [ tops.uniq.size, tops.size ], "chord tops: #{tops.inspect}"
+  end
 end

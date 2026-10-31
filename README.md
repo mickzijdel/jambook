@@ -15,6 +15,7 @@ At a jam, everyone looks up their own chord sheet. That means ads, paywalls, ver
 - **One chord sheet per song,** hosted in the app and rendered in the browser. Paste ChordPro, chords over lyrics, or Ultimate Guitar text.
 - **Notes per song** that everyone sees and the host can edit mid-song.
 - **Auto-scroll** on each phone at its own speed, remembered per song. It isn't synced: a new song from the host stops it.
+- **Chord diagrams:** a row of guitar chord boxes for every chord in the song sits above the sheet, and tapping a chord shows how to play it, with other voicings. They follow the room key and your capo.
 - **Song list** with a status (*liked* or *maybe*) and tags, searchable on a phone.
 - **Import** a song list from CSV, your Ultimate Guitar saved tabs, or paste chord text into any song.
 - **Simple access:** guests type one shared password; the host logs in. Every page sits behind the password and asks search engines not to index it, because chord sheets usually contain copyrighted lyrics.

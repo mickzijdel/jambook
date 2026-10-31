@@ -68,6 +68,7 @@ export default class extends Controller {
     document.fonts.ready.then(() => this.fitTabs())
     if (this.hasCapoTarget) this.capoTarget.textContent = capo
     this.statusTarget.textContent = transposed ? `you play ${shownKey} shapes` : "Key unknown, chords as written"
+    this.dispatch("rendered")
   }
 
   // A tab that fits the screen at 14px or more shrinks to fit; a wider one breaks at its bar lines

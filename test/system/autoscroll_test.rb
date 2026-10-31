@@ -9,6 +9,7 @@ class AutoscrollTest < ApplicationSystemTestCase
     enter_guest_password
 
     assert_selector ".lyrics", text: "79 of a long song"
+    connect_turbo_cable_stream_sources
   end
 
   test "auto-scroll moves the page down until it is paused" do

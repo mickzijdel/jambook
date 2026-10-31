@@ -198,8 +198,12 @@ form.button_to { display: inline-flex; margin: 0; }
 /* Chord boxes: a bar of every chord in the song, and a card for one chord with its other voicings.
    The card is a native popover pinned to the bottom of the screen, so it can't open off-screen. */
 .sheet-output .chord:not(:empty) { cursor: pointer; }
-.chord-bar { display: flex; gap: var(--space-1); list-style: none; margin: var(--space-4) 0 0; overflow-x: auto; padding: 0 0 var(--space-2); }
+.chord-bar-wrap { margin: var(--space-4) 0 0; }
+.chord-bar { display: flex; gap: var(--space-1); list-style: none; margin: 0; overflow-x: auto; padding: 0 0 var(--space-2); }
+.chord-bar.expanded { flex-wrap: wrap; overflow-x: visible; }
 .chord-bar:empty { display: none; }
+.chord-bar-toggle { background: transparent; color: var(--muted); padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+.chord-bar-toggle[hidden] { display: none; }
 .chord-bar-item { background: transparent; display: grid; gap: var(--space-1); justify-items: center; min-height: 0; padding: var(--space-1) var(--space-2); }
 .chord-bar-item:hover { background: var(--raised); }
 .chord-name { color: var(--accent); font: 700 17px/1.2 var(--font-mono); }
@@ -210,7 +214,9 @@ form.button_to { display: inline-flex; margin: 0; }
 .chord-diagram .cd-open { fill: none; stroke: currentColor; stroke-width: 1.2; }
 .chord-diagram .cd-muted, .chord-diagram .cd-base { fill: var(--muted); font: 9px var(--font-text); }
 .chord-diagram .cd-finger { fill: var(--ground); font: 700 7px var(--font-text); }
-.chord-card { background: var(--raised); border: 0; border-radius: 16px; box-shadow: 0 0 0 2px var(--edge); color: var(--ink); inset: auto var(--space-4) var(--space-4); margin: 0 auto; max-width: 20rem; padding: var(--space-4); text-align: center; }
+/* Above the auto-scroll controls, and above the now-playing banner too when that shows. */
+.chord-card { background: var(--raised); border: 0; border-radius: 16px; box-shadow: 0 0 0 2px var(--edge); color: var(--ink); inset: auto var(--space-4) 80px; margin: 0 auto; max-width: 20rem; padding: var(--space-4); text-align: center; }
+body:has(.banner) .chord-card { bottom: 152px; }
 .chord-card-name { color: var(--accent); font: 400 44px/1 var(--font-chalk); margin: 0 0 var(--space-2); }
 .chord-card .chord-diagram { margin: 0 auto; width: 168px; }
 .chord-card-note { color: var(--muted); font-size: 14px; margin: var(--space-2) 0; }

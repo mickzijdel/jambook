@@ -1,7 +1,7 @@
 <%# locals: (song:, key:, key_label:, room_controls: false, actions: nil) %>
 <div id="sheet" class="song-view"
      data-controller="chord-sheet chord-diagrams"
-     data-action="turbo:morph@window->chord-sheet#render resize@window->chord-sheet#fitTabs chord-sheet:rendered->chord-diagrams#refresh"
+     data-action="turbo:morph@window->chord-sheet#render resize@window->chord-sheet#fitTabs chord-sheet:rendered->chord-diagrams#refresh resize@window->chord-diagrams#fitBar"
      data-chord-diagrams-shapes-url-value="<%= asset_path("guitar_chords.json") %>"
      data-chord-sheet-sheet-value="<%= song.sheet %>"
      data-chord-sheet-format-value="<%= song.sheet_format %>"
@@ -37,7 +37,11 @@
     <div class="song-actions row-of-buttons"><%= actions %></div>
   <% end %>
   <%= render "songs/notes", song: song %>
-  <ul id="chord-bar" class="chord-bar" data-chord-diagrams-target="bar" aria-label="Chords in this song" data-turbo-permanent></ul>
+  <div class="chord-bar-wrap">
+    <ul id="chord-bar" class="chord-bar" data-chord-diagrams-target="bar" aria-label="Chords in this song" data-turbo-permanent></ul>
+    <button type="button" class="chord-bar-toggle small" data-chord-diagrams-target="toggle" data-action="chord-diagrams#toggleBar"
+            aria-controls="chord-bar" aria-expanded="false" hidden>Show all chords</button>
+  </div>
   <div id="sheet-output" class="sheet-output" data-chord-sheet-target="output" data-action="click->chord-diagrams#openFromSheet" data-turbo-permanent></div>
 
   <%# How to play one chord, opened from the bar or by tapping a chord in the sheet. %>

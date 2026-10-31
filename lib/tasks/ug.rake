@@ -11,4 +11,10 @@ namespace :ug do
   task :fetch, %i[ urls_txt bundle_json ] => :environment do |_task, args|
     Ug::Fetcher.new(urls_path: args[:urls_txt], bundle_path: args[:bundle_json]).fetch
   end
+
+  desc 'Find free chords for songs with no sheet (a CSV with title and artist columns): bin/rails "ug:find[songs.csv,bundle.json]"'
+  task :find, %i[ songs_csv bundle_json ] => :environment do |_task, args|
+    songs = CSV.read(args[:songs_csv], headers: true).map(&:to_h)
+    Ug::Fetcher.new(urls_path: nil, bundle_path: args[:bundle_json]).find(songs)
+  end
 end

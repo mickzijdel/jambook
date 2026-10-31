@@ -12,18 +12,27 @@ class Ug::Fetcher
   end
 
   def fetch
-    urls.each do |url|
-      unless done?(url)
-        entries << entry_for(url)
-        File.write(@bundle_path, JSON.pretty_generate(entries))
-        @log.puts "#{entries.size}: #{url}"
-      end
+    urls.each { add(entry_for(it), it) unless done?(it) }
+  end
+
+  # For songs with no sheet yet ({ "title", "artist" } each): the best free chords version, kept under
+  # the song's own title and artist so the import fills that song instead of adding another.
+  def find(songs)
+    songs.each do |song|
+      title, artist = song.values_at("title", "artist")
+      add(search(title, artist).merge("title" => title, "artist" => artist), "#{artist} - #{title}") unless entries.any? { it["title"] == title && it["artist"] == artist }
     end
   end
 
   private
     def urls
       File.readlines(@urls_path, chomp: true).map(&:strip).reject { it.empty? || it.start_with?("#") }
+    end
+
+    def add(entry, label)
+      entries << entry
+      File.write(@bundle_path, JSON.pretty_generate(entries))
+      @log.puts "#{entries.size}: #{label}"
     end
 
     def entries
@@ -53,8 +62,13 @@ class Ug::Fetcher
 
     def free_stand_in(official_url)
       artist, title = names_from(official_url)
-      response = get(Ug::Search.url_for("#{artist} #{title}"))
-      free_url = Ug::Search.best_free_chords(Ug::Search.parse(response.body)) if response.is_a?(Net::HTTPSuccess)
+      search(title, artist, official_url:)
+    end
+
+    # A long subtitle in brackets makes the search find nothing, so it's left out of the query.
+    def search(title, artist, official_url: nil)
+      response = get(Ug::Search.url_for("#{artist} #{title.sub(/\s*\(.*\)\s*\z/, "")}"))
+      free_url = Ug::Search.best_free_chords(Ug::Search.parse(response.body), title:, artist:) if response.is_a?(Net::HTTPSuccess)
 
       if free_url
         tab_entry(free_url, official_url: official_url)

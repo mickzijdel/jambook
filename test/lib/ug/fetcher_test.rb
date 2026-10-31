@@ -69,7 +69,7 @@ class Ug::FetcherTest < ActiveSupport::TestCase
     find_sheets([ { "title" => "Greensleeves (Traditional English Ballad)", "artist" => "Traditional" } ])
 
     assert_requested :get, FREE
-    assert_equal [ FREE, "Greensleeves (Traditional English Ballad)", "Traditional" ], bundle.first.values_at("url", "title", "artist")
+    assert_equal [ FREE, "Greensleeves (Traditional English Ballad)", "Traditional", false ], bundle.first.values_at("url", "title", "artist", "saved")
   end
 
   test "a song with no free version is listed as needing a paste" do

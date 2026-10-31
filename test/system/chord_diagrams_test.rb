@@ -7,6 +7,7 @@ class ChordDiagramsTest < ApplicationSystemTestCase
     enter_guest_password
 
     assert_capo 2
+    connect_turbo_cable_stream_sources
   end
 
   test "the chord bar shows each chord in the song once, in the order they come" do

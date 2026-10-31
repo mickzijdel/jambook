@@ -28,6 +28,7 @@ class SongEditorTest < ApplicationSystemTestCase
       enter_guest_password
 
       assert_capo 2
+      connect_turbo_cable_stream_sources
     end
     using_session(:host) do
       sign_in_as_host

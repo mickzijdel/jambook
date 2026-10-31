@@ -20,6 +20,7 @@ class SongsTest < ApplicationSystemTestCase
       visit songs_path
 
       assert_text "Now playing: Amazing Grace"
+      connect_turbo_cable_stream_sources
     end
     using_session(:host) do
       sign_in_as_host
@@ -36,6 +37,7 @@ class SongsTest < ApplicationSystemTestCase
 
       assert_capo 2
       execute_script("window.scrollTo(0, 400)")
+      connect_turbo_cable_stream_sources
     end
     using_session(:host) do
       sign_in_as_host
@@ -55,6 +57,7 @@ class SongsTest < ApplicationSystemTestCase
       enter_guest_password
 
       assert_capo 2
+      connect_turbo_cable_stream_sources
       execute_script("#{cable}.close({ allowReconnect: false })")
     end
     using_session(:host) do

@@ -79,6 +79,15 @@ class Ug::FetcherTest < ActiveSupport::TestCase
     assert bundle.first["needs_paste"]
   end
 
+  # Seen with "Misc Musicals Rent Seasons Of Love": a catch-all artist name made the search find nothing.
+  test "when artist and title find nothing, the title alone is searched" do
+    stub_request(:get, SEARCH).with(query: hash_including("value" => "Traditional Greensleeves")).to_return(body: "<html></html>")
+    stub_request(:get, SEARCH).with(query: hash_including("value" => "Greensleeves")).to_return(body: file_fixture("ug/search_page.html").read)
+    find_sheets([ { "title" => "Greensleeves", "artist" => "Traditional" } ])
+
+    assert_equal FREE, bundle.first["url"]
+  end
+
   test "finding sheets resumes without searching again" do
     songs = [ { "title" => "Greensleeves", "artist" => "Traditional" } ]
     find_sheets(songs)

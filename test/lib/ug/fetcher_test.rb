@@ -33,6 +33,14 @@ class Ug::FetcherTest < ActiveSupport::TestCase
     assert_equal "Greensleeves", bundle.first["title"]
   end
 
+  test "an official tab whose search only finds other songs needs a paste" do
+    fetch("https://tabs.ultimate-guitar.com/tab/traditional/scarborough-fair-official-4")
+
+    assert_not_requested :get, FREE
+    assert bundle.first["needs_paste"]
+    assert_equal "Scarborough Fair", bundle.first["title"]
+  end
+
   test "a second run resumes without refetching" do
     fetch(TAB)
     WebMock.reset_executed_requests!
@@ -57,7 +65,35 @@ class Ug::FetcherTest < ActiveSupport::TestCase
     assert_equal "HTTP 403", bundle.first["error"]
   end
 
+  test "a song without a sheet gets the best free chords, under its own name so the import matches it" do
+    find_sheets([ { "title" => "Greensleeves (Traditional English Ballad)", "artist" => "Traditional" } ])
+
+    assert_requested :get, FREE
+    assert_equal [ FREE, "Greensleeves (Traditional English Ballad)", "Traditional" ], bundle.first.values_at("url", "title", "artist")
+  end
+
+  test "a song with no free version is listed as needing a paste" do
+    stub_request(:get, SEARCH).to_return(body: "<html></html>")
+    find_sheets([ { "title" => "Greensleeves", "artist" => "Traditional" } ])
+
+    assert bundle.first["needs_paste"]
+  end
+
+  test "finding sheets resumes without searching again" do
+    songs = [ { "title" => "Greensleeves", "artist" => "Traditional" } ]
+    find_sheets(songs)
+    WebMock.reset_executed_requests!
+    find_sheets(songs)
+
+    assert_not_requested :get, SEARCH
+    assert_equal 1, bundle.size
+  end
+
   private
+    def find_sheets(songs)
+      Ug::Fetcher.new(urls_path: @urls, bundle_path: @bundle, delay: 0, log: StringIO.new).find(songs)
+    end
+
     def fetch(*urls)
       File.write(@urls, "# saved tabs\n" + urls.join("\n") + "\n")
       Ug::Fetcher.new(urls_path: @urls, bundle_path: @bundle, delay: 0, log: StringIO.new).fetch

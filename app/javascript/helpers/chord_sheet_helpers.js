@@ -1,4 +1,5 @@
 import { ChordLyricsPair, ChordProFormatter, ChordProParser, HtmlDivFormatter, Tag, UltimateGuitarParser } from "chordsheetjs"
+import { isChordSymbol } from "helpers/chord_shapes"
 
 // Ultimate Guitar wraps chords in [ch]..[/ch] and tab blocks in [tab]..[/tab]; the layout is what matters.
 const UG_MARKUP = /\[\/?(ch|tab)\]/g
@@ -22,9 +23,24 @@ export function detectFormat(sheet) {
   return bracketed.some((token) => CHORD.test(token)) ? "chordpro" : "ultimate_guitar"
 }
 
+// The Ultimate Guitar parser takes any line of words starting with A to G for chords ("From",
+// "Californication") and transposes them. A line is chords only if each such word is a chord symbol,
+// or a quick run of them joined by dashes (Em-G7-C-B7).
+const chordWord = (word) => !/^[A-G]/.test(word) || isChordSymbol(word) || word.split("-").filter(Boolean).every(isChordSymbol)
+
+class SheetParser extends UltimateGuitarParser {
+  parseNonEmptyLine(line) {
+    if (line.trim().split(/\s+/).every(chordWord)) return super.parseNonEmptyLine(line)
+
+    // What chordsheetjs 18 does with a line that isn't chords.
+    this.chordLyricsPair = this.songLine.addChordLyricsPair()
+    this.chordLyricsPair.lyrics = line
+  }
+}
+
 function parse(sheet, format) {
   if (format === "ultimate_guitar") {
-    return new UltimateGuitarParser({ preserveWhitespace: false }).parse(sheet.replace(UG_MARKUP, ""))
+    return new SheetParser({ preserveWhitespace: false }).parse(sheet.replace(UG_MARKUP, ""))
   }
   return new ChordProParser().parse(sheet)
 }

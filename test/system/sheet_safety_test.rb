@@ -25,6 +25,21 @@ class SheetSafetyTest < ApplicationSystemTestCase
     assert_no_selector "#sheet-output .chord", text: "Chorus"
   end
 
+  # Seen in Californication: a line of words starting with A to G was read as chords and, with a key
+  # change, transposed into "Bbalifornication".
+  test "a line of words isn't mistaken for chords, so it isn't transposed" do
+    Room.instance.play(Song.create!(title: "Words", artist: "Traditional", written_key: "G", house_key: "A", sheet_format: "ultimate_guitar",
+      sheet: "Californication\nPsychic spies from China\nG       C\nTry to steal your mind's elation\nA7      Em-G7-C-B7  Gbm7-5\nLaid in the ashes"))
+    enter_guest_password
+
+    within("#sheet-output") do
+      assert_selector ".chord", text: /\AD\z/
+      assert_selector ".chord", text: /\AB7\z/ # a run of chords joined by dashes keeps its line as chords
+      assert_selector ".lyrics", text: "Californication"
+    end
+    assert_no_selector "#sheet-output .chord", text: "alifornication"
+  end
+
   test "saving an untouched Ultimate Guitar sheet keeps it" do
     sign_in_as_host
     visit edit_song_path(songs(:auld_lang_syne))

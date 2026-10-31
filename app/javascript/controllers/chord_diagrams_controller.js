@@ -1,10 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 import { diagramSvg, findShapes } from "helpers/chord_shapes"
+import { recall, remember } from "helpers/device_store"
 
 // Chord boxes for the chords on screen, so they follow the room key and this viewer's capo: a bar of
 // every chord in the song, and a card with the other voicings for a chord tapped in the sheet or the bar.
 export default class extends Controller {
-  static targets = [ "bar", "card", "name", "diagram", "note", "voicings", "count" ]
+  static targets = [ "bar", "toggle", "card", "name", "diagram", "note", "voicings", "count" ]
   static values = { shapesUrl: String }
 
   #shapes = null
@@ -27,6 +28,23 @@ export default class extends Controller {
       return found ? [ { name, found } ] : []
     })
     this.#drawBar()
+  }
+
+  // A bar too long for the screen scrolls sideways; this phone can choose to see every chord instead.
+  toggleBar() {
+    remember("chord-bar", this.#expanded ? "scroll" : "expanded")
+    this.fitBar()
+  }
+
+  fitBar() {
+    this.barTarget.classList.toggle("expanded", this.#expanded)
+    this.toggleTarget.hidden = !this.#expanded && this.barTarget.scrollWidth <= this.barTarget.clientWidth
+    this.toggleTarget.setAttribute("aria-expanded", this.#expanded)
+    this.toggleTarget.textContent = this.#expanded ? "Show fewer chords" : "Show all chords"
+  }
+
+  get #expanded() {
+    return recall("chord-bar") === "expanded"
   }
 
   openFromBar({ currentTarget, params: { name } }) {
@@ -72,6 +90,7 @@ export default class extends Controller {
       <li><button type="button" class="chord-bar-item" data-action="chord-diagrams#openFromBar" data-chord-diagrams-name-param="${escape(name)}">
         <span class="chord-name">${escape(name)}</span><span aria-hidden="true">${diagramSvg(name, found.positions[this.#index(name)])}</span>
       </button></li>`).join("")
+    this.fitBar()
   }
 
   #drawCard() {

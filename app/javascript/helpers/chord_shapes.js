@@ -15,6 +15,7 @@ const TYPES = {
   11: "11", m11: "m11", 13: "13", "7b9": "7b9", "7#9": "7#9", "7b5": "7b5", mmaj7: "mmaj7", mM7: "mmaj7", "m(maj7)": "mmaj7",
   // Spellings seen in Ultimate Guitar sheets.
   Dim: "dim", sus7: "7sus4", "m(ma7)": "mmaj7", "(9)": "add9", "(2)": "add9", "(4)": "sus4", ma9: "maj9", mmaj9: "mmaj9", m2: "madd9",
+  "m7-5": "m7b5", "7-5": "7b5", "7-9": "7b9",
   5: "5"
 }
 const CHORD = /^([A-G][#b]?)([^/]*)(?:\/([A-G][#b]?))?$/
@@ -23,29 +24,77 @@ const CHORD_TYPE = /^(?:maj|min|mi|ma|dim|aug|sus|add|alt|no|[mMΔø°+#b0-9()*,
 const NOTES = { C: 0, "B#": 0, "C#": 1, Db: 1, D: 2, "D#": 3, Eb: 3, E: 4, Fb: 4, F: 5, "E#": 5, "F#": 6, Gb: 6, G: 7, "G#": 8, Ab: 8,
   A: 9, "A#": 10, Bb: 10, B: 11, Cb: 11 }
 const STRINGS = [ "low E", "A", "D", "G", "B", "high E" ]
+const OPEN = [ 4, 9, 2, 7, 11, 4 ] // standard tuning, low E to high E, as pitch classes
+
+// Whether a word is a chord symbol (Am7, F#m7(b5), D/F#), not a word that starts with A to G.
+export function isChordSymbol(symbol) {
+  return parse(symbol) !== null
+}
+
+// Root, chord type and bass of a symbol, or null. Ultimate Guitar marks a particular voicing with
+// asterisks (C*, Cadd9**); some sheets write A\C# for A/C#.
+function parse(symbol) {
+  const match = symbol.trim().replace(/\*+$/, "").replace("\\", "/").match(CHORD)
+  if (!match) return null
+  const written = match[2].replace(/\(([#b]\d+)\)/g, "$1") // m7(b5) is m7b5
+  return written in TYPES || CHORD_TYPE.test(written) ? { root: match[1], written, bass: match[3] } : null
+}
 
 // { positions, note }, where note says what to do when the exact chord isn't in the data;
 // null for anything that isn't a chord.
 export function findShapes(symbol, chords) {
-  // Ultimate Guitar marks a particular voicing with asterisks (C*, Cadd9**); some sheets write A\C# for A/C#.
-  const match = symbol.trim().replace(/\*+$/, "").replace("\\", "/").match(CHORD)
-  const byType = match && chords[ROOTS[match[1]]]
+  const parts = parse(symbol)
+  const byType = parts && chords[ROOTS[parts.root]]
   if (!byType) return null
 
-  const [ , root, , bass ] = match
-  const written = match[2].replace(/\(([#b]\d+)\)/g, "$1") // m7(b5) is m7b5
-  if (!(written in TYPES || CHORD_TYPE.test(written))) return null
-  if (written === "5") return { positions: powerShapes(root), note: bass ? `Play ${bass} in the bass.` : null }
+  const { root, written, bass } = parts
+  if (written === "5") return { positions: powerShapes(root), note: bass ? `${bass} in the bass` : null }
   const minor = /^(m|min|mi|-)(?!aj|a\d)/.test(written) // ma7, ma9: major
   const type = TYPES[written] ?? (minor ? "minor" : "major")
-  const notes = []
-  if (!(written in TYPES)) notes.push(`Shown as ${root}${minor ? "m" : ""}, the nearest chord in the chord book.`)
+  const shapes = byType[type]
+  if (!shapes) return null
+
+  const notes = written in TYPES ? [] : [ `Shown as ${root}${minor ? "m" : ""}` ]
   if (bass) {
-    const slash = type === "major" || type === "minor" ? byType[`${minor ? "m" : ""}/${BASSES[bass]}`] : null
-    if (slash) return { positions: slash, note: notes.join(" ") || null }
-    notes.push(`Play ${bass} in the bass.`)
+    // The data's own slash shapes are checked too: a few have the wrong lowest note or an extra one.
+    const tones = new Set(shapes.flatMap(sounding))
+    const own = (type === "major" || type === "minor" ? byType[`${minor ? "m" : ""}/${BASSES[bass]}`] ?? [] : [])
+      .filter((shape) => sounding(shape)[0] === NOTES[bass] && sounding(shape).every((note) => note === NOTES[bass] || tones.has(note)))
+    const slash = own.length ? own : withBass(shapes, NOTES[bass])
+    if (slash.length) return { positions: slash, note: notes.join(", ") || null }
+    notes.push(`${bass} in the bass`)
   }
-  return byType[type] ? { positions: byType[type], note: notes.join(" ") || null } : null
+  return { positions: shapes, note: notes.join(", ") || null }
+}
+
+const sounding = ({ frets, baseFret }) => frets.flatMap((fret, string) => (fret < 0 ? [] : [ (OPEN[string] + (fret && baseFret + fret - 1)) % 12 ]))
+
+// The data has slash chords for only a few roots. Build the rest: put the bass on the low E, A or D string
+// of each shape, muting the strings below it, where the shape keeps its notes and fits four frets and
+// four fingers. The easiest option (smallest stretch, then lowest string) wins for each shape.
+function withBass(shapes, bass) {
+  const built = shapes.flatMap((shape) => {
+    const options = [ 0, 1, 2 ].flatMap((string) => [ 0, 12 ].map((octave) => bassOn(shape, string, (bass - OPEN[string] + 12) % 12 + octave)))
+    const keeps = (option) => sounding(shape).every((note) => sounding(option.shape).includes(note))
+    return options.filter((option) => option && keeps(option)).sort((a, b) => a.span - b.span || a.string - b.string).slice(0, 1).map((option) => option.shape)
+  })
+  return built.filter((shape, i) => built.findIndex((other) => `${other.frets}@${other.baseFret}` === `${shape.frets}@${shape.baseFret}`) === i)
+}
+
+function bassOn({ frets, fingers, baseFret, barres }, string, fret) {
+  const absolute = frets.map((each, s) => (s < string ? -1 : s === string ? fret : each > 0 ? baseFret + each - 1 : each))
+  const fingered = fingers.map((each, s) => (s <= string ? 0 : each))
+  const barreFrets = barres.map((barre) => baseFret + barre - 1)
+  const fretted = absolute.filter((each) => each > 0)
+  const span = fretted.length ? Math.max(...fretted) - Math.min(...fretted) : 0
+  const fingersNeeded = new Set(fingered.filter(Boolean)).size + (fret > 0 ? 1 : 0)
+  // A new note on a barre's fret would stretch the drawn barre to it.
+  if (span > 3 || fingersNeeded > 4 || (fret > 0 && barreFrets.includes(fret))) return null
+
+  const base = fretted.length && Math.max(...fretted) > 4 ? Math.min(...fretted) : 1
+  const relative = absolute.map((each) => (each > 0 ? each - base + 1 : each))
+  const kept = barreFrets.map((barre) => barre - base + 1).filter((barre) => relative.filter((each) => each === barre).length > 1)
+  return { string, span, shape: { frets: relative, fingers: fingered, baseFret: base, barres: kept } }
 }
 
 // The data has no power chords: root and fifth (plus the octave), with the root on the low E or the A string.

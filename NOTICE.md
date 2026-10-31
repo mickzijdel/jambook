@@ -1,4 +1,4 @@
-# Third-party code and fonts
+# Third-party code, data and fonts
 
 Jambook's own code is MIT-licensed (see [LICENSE](LICENSE)). It ships with the following, under their own licences.
 
@@ -14,3 +14,11 @@ The GPL covers this file, and the browser downloads it with every page. If you r
 ## Fonts: SIL Open Font License 1.1
 
 Chivo and Chivo Mono (The Chivo Project Authors), Fredericka the Great (Tart Workshop) and Caveat Brush (Google), from Fontsource. Licence text and copyright notices: [app/assets/fonts/LICENSES.txt](app/assets/fonts/LICENSES.txt).
+
+## Guitar chord shapes: chords-db, MIT
+
+- Version: @tombatossals/chords-db 0.5.1 (`lib/guitar.json`), in `app/assets/data/guitar_chords.json`.
+- Licence text: [app/assets/data/guitar_chords-LICENSE.txt](app/assets/data/guitar_chords-LICENSE.txt). Copyright (c) 2016 David Rubert.
+- Source: <https://github.com/tombatossals/chords-db>
+- Changed: MIDI notes dropped and the `Csharp`/`Fsharp` keys renamed `C#`/`F#`, with
+  `jq -c '.chords | with_entries(.key |= sub("sharp"; "#") | .value |= (map({key: .suffix, value: (.positions | map({frets, fingers, baseFret, barres} + (if .capo then {capo: true} else {} end)))}) | from_entries))' lib/guitar.json`

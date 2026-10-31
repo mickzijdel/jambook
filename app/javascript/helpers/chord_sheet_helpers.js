@@ -138,6 +138,15 @@ export function renderSheet({ sheet, format, writtenKey, writtenCapo = 0, key, c
   }
 }
 
+// "Capo 4th fret" near the top: Ultimate Guitar sheets give the capo as text, which the parser skips.
+// Further down, sheets chart the same chords at other capos. The importer uses the same rule.
+const CAPO_LINE = /^[^\w\n]*capo(?![a-z])[^\w\n]*(?:(?:on|at|the)\s+)*(\d{1,2})(?!\d)/im
+
+function capoLine(sheet) {
+  const capo = Number(sheet.split(/\r?\n/).slice(0, 10).join("\n").match(CAPO_LINE)?.[1] ?? 0)
+  return capo >= 1 && capo <= 11 ? capo : null
+}
+
 // Tab parts become ChordPro tab sections, so they survive the conversion untouched.
 export function toChordPro({ sheet, format }) {
   let key = null
@@ -150,5 +159,5 @@ export function toChordPro({ sheet, format }) {
     capo ??= song.capo ? Number(song.capo) : null
     return new ChordProFormatter().format(song).trim()
   })
-  return { chordpro: parts.join("\n\n"), key, capo }
+  return { chordpro: parts.join("\n\n"), key, capo: capo ?? capoLine(sheet) }
 }

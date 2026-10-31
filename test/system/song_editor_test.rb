@@ -10,6 +10,14 @@ class SongEditorTest < ApplicationSystemTestCase
     assert_select "Written key", selected: "G"
   end
 
+  test "pasting an Ultimate Guitar sheet picks up its capo line" do
+    sign_in_as_host
+    visit new_song_path
+    fill_in "Sheet", with: "Capo 4th fret\n\n[Verse 1]\nD/F#  G\nAn old man"
+
+    assert_field "Written capo", with: "4"
+  end
+
   test "a saved sheet is stored as ChordPro" do
     sign_in_as_host
     visit new_song_path

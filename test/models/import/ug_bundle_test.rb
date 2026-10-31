@@ -9,6 +9,33 @@ class Import::UgBundleTest < ActiveSupport::TestCase
     assert_equal [ "G", "A" ], [ song.written_key, song.house_key ]
   end
 
+  # Ironic's page data has no capo; its sheet opens with "Capo 4th fret".
+  test "a capo named at the top of the sheet sets the written key when UG's data has none" do
+    import entry(key: "E", content: "Capo 4th fret\n\n[Verse 1]\nD/F#  G\nAn old man")
+
+    assert_equal [ 4, "C", "E" ], Song.find_by!(title: "The Water Is Wide").values_at(:written_capo, :written_key, :house_key)
+  end
+
+  test "a capo line is read however it's written" do
+    lines = { "Capo: 2" => 2, "(Capo 3rd fret)" => 3, "CAPO ON THE 5TH FRET" => 5, "No capo" => 0 }
+    import(*lines.keys.map { entry(title: it, key: "A", content: "#{it}\nC  F\nla") })
+
+    assert_equal lines.values, lines.keys.map { Song.find_by!(title: it).written_capo }
+  end
+
+  test "UG's own capo beats one named in the sheet" do
+    import entry(key: "F#", capo: 4, content: "Capo on 6\nD  A\nla")
+
+    assert_equal [ 4, "D" ], Song.find_by!(title: "The Water Is Wide").values_at(:written_capo, :written_key)
+  end
+
+  # Beatles tabs end with charts of the same chords at other capos ("Capo IV", "Capo 2").
+  test "a capo chart lower down in the sheet doesn't count" do
+    import entry(key: "E", content: "#{"C  F\nla\n" * 5}Capo 2\nA  D\nla")
+
+    assert_equal [ 0, "E" ], Song.find_by!(title: "The Water Is Wide").values_at(:written_capo, :written_key)
+  end
+
   test "an existing sheet is never replaced" do
     result = import entry(title: "Amazing Grace", artist: "John Newton", content: "D  G\nla")
 

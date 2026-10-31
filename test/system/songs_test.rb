@@ -3,6 +3,17 @@ require "application_system_test_case"
 class SongsTest < ApplicationSystemTestCase
   setup { Room.instance.play(songs(:amazing_grace)) }
 
+  # Most songs from Buck's list have no sheet yet; a blank page looked broken.
+  test "a song without a chord sheet says so, and the host can add one" do
+    sign_in_as_host
+    visit song_path(Song.create!(title: "No sheet yet", artist: "Traditional"))
+
+    assert_text "No chord sheet yet"
+    click_on "Add one"
+
+    assert_field "Sheet"
+  end
+
   test "the banner follows the room" do
     using_session(:guest) do
       enter_guest_password

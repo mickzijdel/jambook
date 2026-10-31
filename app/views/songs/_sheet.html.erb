@@ -37,6 +37,9 @@
     <div class="song-actions row-of-buttons"><%= actions %></div>
   <% end %>
   <%= render "songs/notes", song: song %>
+  <% if song.sheet.blank? %>
+    <p class="empty-sheet">No chord sheet yet.<% if authenticated? %> <%= link_to "Add one", edit_song_path(song) %><% end %></p>
+  <% end %>
   <div class="chord-bar-wrap">
     <ul id="chord-bar" class="chord-bar" data-chord-diagrams-target="bar" aria-label="Chords in this song" data-turbo-permanent></ul>
     <button type="button" class="chord-bar-toggle small" data-chord-diagrams-target="toggle" data-action="chord-diagrams#toggleBar"

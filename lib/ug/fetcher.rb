@@ -65,16 +65,22 @@ class Ug::Fetcher
       search(title, artist, official_url:)
     end
 
-    # A long subtitle in brackets makes the search find nothing, so it's left out of the query.
+    # A long subtitle in brackets makes the search find nothing, so it's left out of the query, and so
+    # can a catch-all artist ("Misc Musicals"), so the title alone is tried next.
     def search(title, artist, official_url: nil)
-      response = get(Ug::Search.url_for("#{artist} #{title.sub(/\s*\(.*\)\s*\z/, "")}"))
-      free_url = Ug::Search.best_free_chords(Ug::Search.parse(response.body), title:, artist:) if response.is_a?(Net::HTTPSuccess)
+      short = title.sub(/\s*\(.*\)\s*\z/, "")
+      free_url = [ "#{artist} #{short}", short ].lazy.filter_map { |query| best_free_chords(query, title:, artist:) }.first
 
       if free_url
         tab_entry(free_url, official_url: official_url)
       else
         { "url" => official_url, "official_url" => official_url, "title" => title, "artist" => artist, "needs_paste" => true }
       end
+    end
+
+    def best_free_chords(query, title:, artist:)
+      response = get(Ug::Search.url_for(query))
+      Ug::Search.best_free_chords(Ug::Search.parse(response.body), title:, artist:) if response.is_a?(Net::HTTPSuccess)
     end
 
     # /tab/red-hot-chili-peppers/cant-stop-official-1918879 → ["Red Hot Chili Peppers", "Cant Stop"]

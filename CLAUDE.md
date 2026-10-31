@@ -22,7 +22,7 @@ UI: phone-first, dark theme by default, and every host action works one-handed o
 ## Tests
 
 - One file: `t test/models/song_test.rb` (or `file:line`). On this machine a hook blocks plain `bin/rails test`; use `t`.
-- Full suite: `t` **and** `t test/system/*_test.rb`. Bare `t` skips system tests.
+- Full suite: `t` **and** `t test/system/*_test.rb`. Bare `t` skips system tests. System tests run one at a time (`parallelize(workers: 1)`); `t test/system` sets `PARALLEL_WORKERS` and brings back the parallel flakes.
 - CI runs `bin/rails test` and `bin/rails test:system` as separate jobs.
 - System tests run headless Chrome at 390×844; `SYSTEM_TESTS_BROWSER=chrome` shows the browser.
 - Minitest with fixtures only. One behaviour per test, at most 4 assertions, sentence names (`test "guests need the password"`). Shared helpers go in `test/test_helpers/`.

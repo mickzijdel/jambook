@@ -16,11 +16,12 @@ class Ug::Fetcher
   end
 
   # For songs with no sheet yet ({ "title", "artist" } each): the best free chords version, kept under
-  # the song's own title and artist so the import fills that song instead of adding another.
+  # the song's own title and artist so the import fills that song instead of adding another, and
+  # marked as not one of the host's saved tabs so the import leaves the song's status alone.
   def find(songs)
     songs.each do |song|
       title, artist = song.values_at("title", "artist")
-      add(search(title, artist).merge("title" => title, "artist" => artist), "#{artist} - #{title}") unless entries.any? { it["title"] == title && it["artist"] == artist }
+      add(search(title, artist).merge("title" => title, "artist" => artist, "saved" => false), "#{artist} - #{title}") unless entries.any? { it["title"] == title && it["artist"] == artist }
     end
   end
 

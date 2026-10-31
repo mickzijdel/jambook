@@ -28,6 +28,27 @@ class Import::UgBundleTest < ActiveSupport::TestCase
     assert_predicate Song.find_by!(title: "The Water Is Wide"), :maybe?
   end
 
+  test "a saved tab makes a matching maybe song liked" do
+    song = Song.create!(title: "The Water Is Wide", artist: "Traditional", status: "maybe")
+    import entry(content: "C  F\nla")
+
+    assert_predicate song.reload, :liked?
+  end
+
+  # ug:find bundles hold sheets found for songs already in the list, such as Buck's suggestions.
+  test "a sheet found for a song in the list keeps its status" do
+    song = Song.create!(title: "The Water Is Wide", artist: "Traditional", status: "maybe")
+    import entry(saved: false, content: "C  F\nla")
+
+    assert_equal [ "maybe", "C  F\nla" ], song.reload.values_at(:status, :sheet)
+  end
+
+  test "a found sheet with no song to match comes in as maybe" do
+    import entry(saved: false, content: "C  F\nla")
+
+    assert_predicate Song.find_by!(title: "The Water Is Wide"), :maybe?
+  end
+
   test "a paid tab without a free version is marked for pasting" do
     result = import entry(needs_paste: true, content: nil)
 

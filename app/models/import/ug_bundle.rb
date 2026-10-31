@@ -29,9 +29,10 @@ class Import::UgBundle
       result.skipped << entry["title"]
     end
 
-    # "Can play it now": an advanced tab comes in as a maybe.
+    # "Can play it now": an advanced tab comes in as a maybe. A sheet that ug:find found for a song in
+    # the list ("saved": false) isn't one of the host's saved tabs, so it doesn't make the song liked.
     def status_for(entry)
-      entry["difficulty"] == "advanced" ? "maybe" : "liked"
+      entry["saved"] == false || entry["difficulty"] == "advanced" ? "maybe" : "liked"
     end
 
     def fill(song, entry, result)

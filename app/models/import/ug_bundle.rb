@@ -1,6 +1,10 @@
 # Imports a bundle from Ug::Fetcher. Fills in, never overwrites: a song that already has a sheet
 # keeps it and the tab is listed as an alternate. Chords versions are imported before other types.
 class Import::UgBundle
+  # "Capo 4th fret" near the top, for a tab whose page data has no capo. Further down, sheets chart
+  # the same chords at other capos. The sheet editor reads a paste the same way (chord_sheet_helpers).
+  CAPO_LINE = /^[^\w\n]*capo(?![a-z])[^\w\n]*(?:(?:on|at|the)\s+)*(\d{1,2})(?!\d)/i
+
   def initialize(io)
     @entries = JSON.parse(io.read)
   rescue JSON::ParserError => error
@@ -53,9 +57,14 @@ class Import::UgBundle
 
     def add_sheet(song, entry)
       sounding_key = MusicKey.normalize(entry["key"])
-      capo = entry["capo"].to_i
+      capo = entry["capo"].to_i.nonzero? || capo_line(entry["content"])
 
       song.assign_attributes(sheet: entry["content"], sheet_format: "ultimate_guitar", written_capo: capo, needs_paste: false,
         written_key: (MusicKey.transpose(sounding_key, -capo) if sounding_key), house_key: sounding_key)
+    end
+
+    def capo_line(sheet)
+      capo = sheet.lines.first(10).join[CAPO_LINE, 1].to_i
+      capo.between?(1, 11) ? capo : 0
     end
 end

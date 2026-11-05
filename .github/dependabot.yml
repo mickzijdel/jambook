@@ -1,6 +1,6 @@
 # Groups: minor/patch bumps land in one PR per ecosystem (majors keep their own), and every
 # security fix lands together, so a one-gem PR can't fail bundler-audit on the other vulnerable
-# gems still on main. The 7-day cooldown is what zizmor's dependabot-cooldown audit requires.
+# gems still on main. The 3-day cooldown matches the Gemfile; .github/zizmor.yml lets it pass zizmor.
 version: 2
 updates:
 - package-ecosystem: bundler
@@ -8,7 +8,7 @@ updates:
   schedule:
     interval: daily
   cooldown:
-    default-days: 7
+    default-days: 3
   open-pull-requests-limit: 10
   groups:
     gems:
@@ -22,7 +22,7 @@ updates:
   schedule:
     interval: daily
   cooldown:
-    default-days: 7
+    default-days: 3
   open-pull-requests-limit: 10
   groups:
     actions:

@@ -23,3 +23,7 @@ Noticed while building; not part of the plan.
 
 - **A page that loads as the host changes song can miss that change**: Turbo broadcasts aren't replayed, and resync only refreshes after a reconnect, not after the first connect. A guest whose page rendered just before the change keeps the old song until the next one. Found 2026-10-31 as the cause of the flaky browser tests (fixed there by waiting for the subscription). Fix: on the first `connected`, refresh if the page was rendered more than a second earlier.
 - **Words read as chords get transposed in the sheet** (found 2026-10-31 while checking chord diagrams against the local library): the Ultimate Guitar parser takes some lyric or label lines for chord lines ("From", "Californication", "Farquaad:", "Ah-Ah,"), so with a key set they show as "Ebrom", "Bbalifornication". Chord boxes already skip them (`findShapes` returns null); the sheet could do the same by keeping a "chord" that `findShapes` rejects as lyrics.
+
+## Seen during the dependency sweep (2026-11-05)
+
+- **`song_editor_test.rb` still flakes under machine load, even serially**: on a loaded laptop (load average about 10) "a saved sheet is stored as ChordPro" stayed on the form after `click_on "Save"` (the preview showed only part of the typed sheet), and "the host edits the note live" could not find the "Notes" field. A re-run of the file passed. Both look like actions before the Stimulus controller connects or before the turbo frame loads; wait for them (as the 2026-10-31 test-waits fix does) in these two tests.

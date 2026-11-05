@@ -1,5 +1,5 @@
-# cooldown: gems must be public 4 days before resolving (supply-chain defense, Bundler 4.0.13+)
-source "https://rubygems.org", cooldown: 4
+# cooldown: gems must be public 3 days before resolving (supply-chain defense, Bundler 4.0.13+)
+source "https://rubygems.org", cooldown: 3
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.1.4"

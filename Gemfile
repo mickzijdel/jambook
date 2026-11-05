@@ -47,7 +47,7 @@ gem "thruster", require: false
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 2.2"
 # image_processing 2.x no longer pulls in a backend; ruby-vips backs Rails' default :vips processor
-gem "ruby-vips"
+gem "ruby-vips", require: false
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

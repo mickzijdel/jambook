@@ -26,8 +26,8 @@ Jambook is one install per host. It is not a hosted multi-user service.
 ## Built with
 
 - Ruby 4.0.2
-- Rails 8.1.4
-- SQLite (sqlite3 gem 2.10.1)
+- Rails 8.1.4.1
+- SQLite (sqlite3 gem 2.10.2)
 - Hotwire: turbo-rails 2.0.23 and stimulus-rails 1.3.4
 - importmap-rails 2.2.3, so there is no JavaScript build step
 - Solid Cable 4.1.0 for live updates over Action Cable, stored in SQLite

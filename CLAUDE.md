@@ -52,10 +52,10 @@ UI: phone-first, dark theme by default, and every host action works one-handed o
 Read from `.ruby-version` and `Gemfile.lock` on 2026-10-30. Update this list when you upgrade one.
 
 - Ruby 4.0.2
-- Rails 8.1.4
+- Rails 8.1.4.1
 - turbo-rails 2.0.23
 - stimulus-rails 1.3.4
 - importmap-rails 2.2.3
 - solid_cable 4.1.0
-- sqlite3 2.10.1
+- sqlite3 2.10.2
 - ChordSheetJS 18.0.0: planned, to be pinned with `bin/importmap pin chordsheetjs@18.0.0`

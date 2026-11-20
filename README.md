@@ -25,7 +25,7 @@ Jambook is one install per host. It is not a hosted multi-user service.
 
 ## Built with
 
-- Ruby 4.0.2
+- Ruby 4.0.10
 - Rails 8.1.4.1
 - SQLite (sqlite3 gem 2.10.2)
 - Hotwire: turbo-rails 2.0.23 and stimulus-rails 1.3.4
@@ -35,7 +35,7 @@ Jambook is one install per host. It is not a hosted multi-user service.
 
 ## Setup
 
-You need Ruby 4.0.2 (pinned in `.ruby-version`; any Ruby version manager works) and [mise](https://mise.jdx.dev) for the dev tools.
+You need Ruby 4.0.10 (pinned in `.ruby-version`; any Ruby version manager works) and [mise](https://mise.jdx.dev) for the dev tools.
 
 ```sh
 mise install          # dev tools from mise.toml: hk, gitleaks, Node and others
